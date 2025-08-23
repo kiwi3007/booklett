@@ -1,0 +1,7 @@
+{
+  "name": "chaptarr-mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
