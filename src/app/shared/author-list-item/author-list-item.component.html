@@ -1,0 +1,13 @@
+<ion-item lines="none" class="bg-card rounded-xl my-1" [routerLink]="['/author', author.id]" detail="false">
+  <ion-avatar slot="start">
+    <img [src]="author.imageUrl" [alt]="fullName" loading="lazy" />
+  </ion-avatar>
+  <ion-label>
+    <h3 class="font-medium">{{ fullName }}</h3>
+    <p class="text-muted text-xs">
+      <i class="fa-solid fa-book mr-1"></i>
+      {{ author.monitoredBookCount }} / {{ author.bookCount }}
+    </p>
+  </ion-label>
+  <i class="fa-solid fa-chevron-right text-muted" slot="end"></i>
+</ion-item>

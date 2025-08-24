@@ -1,0 +1,171 @@
+<ion-header>
+  <div class="modal-handle"></div>
+  <ion-toolbar>
+    <ion-title>{{ book?.title }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Book Info Section -->
+  <div class="book-header">
+    <div class="book-cover-container">
+      <img [src]="getBookCover()" [alt]="book?.title" class="book-cover">
+    </div>
+    <div class="book-info">
+      <h2>{{ book?.title }}</h2>
+      <p class="author-name">by {{ author?.authorName || book?.authorName }}</p>
+      
+      <div class="book-metadata">
+        <div class="metadata-item" *ngIf="book?.seriesTitle">
+          <ion-icon name="library-outline"></ion-icon>
+          <span>{{ book.seriesTitle }} #{{ book.seriesPosition }}</span>
+        </div>
+        
+        <div class="metadata-item" *ngIf="book?.releaseDate">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ book.releaseDate | date:'MMM d, y' }}</span>
+        </div>
+        
+        <div class="metadata-item" *ngIf="book?.audiobookDuration">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>{{ formatDuration(book.audiobookDuration) }}</span>
+        </div>
+        
+        <div class="metadata-item" *ngIf="book?.pageCount">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <span>{{ book.pageCount }} pages</span>
+        </div>
+        
+        <div class="metadata-item" *ngIf="book?.ratings?.value">
+          <ion-icon name="star"></ion-icon>
+          <span>{{ book.ratings.value }}/5 ({{ book.ratings.votes }} votes)</span>
+        </div>
+      </div>
+
+      <!-- Monitor Toggle Button -->
+      <ion-button 
+        class="monitor-button"
+        [color]="book?.monitored ? 'success' : 'medium'"
+        (click)="toggleMonitor()"
+        [disabled]="isUpdatingMonitor">
+        <ion-icon [name]="book?.monitored ? 'checkmark-circle' : 'add-circle-outline'" slot="start"></ion-icon>
+        {{ book?.monitored ? 'Monitored' : 'Not Monitored' }}
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ion-segment [value]="selectedTab" (ionChange)="selectTab($any($event.detail.value))">
+    <ion-segment-button value="details">
+      <ion-label>Details</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="history">
+      <ion-label>History</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="files">
+      <ion-label>Files</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Details Tab -->
+    <div *ngIf="selectedTab === 'details'" class="details-tab">
+      <div class="overview-section" *ngIf="book?.overview">
+        <h3>Overview</h3>
+        <p>{{ book.overview }}</p>
+      </div>
+
+      <div class="additional-info">
+        <h3>Additional Information</h3>
+        
+        <ion-list>
+          <ion-item *ngIf="book?.publisher">
+            <ion-label>
+              <strong>Publisher:</strong> {{ book.publisher }}
+            </ion-label>
+          </ion-item>
+          
+          <ion-item *ngIf="book?.narrator">
+            <ion-label>
+              <strong>Narrator:</strong> {{ book.narrator }}
+            </ion-label>
+          </ion-item>
+          
+          <ion-item *ngIf="book?.asin">
+            <ion-label>
+              <strong>ASIN:</strong> {{ book.asin }}
+            </ion-label>
+          </ion-item>
+          
+          <ion-item *ngIf="book?.isbn">
+            <ion-label>
+              <strong>ISBN:</strong> {{ book.isbn }}
+            </ion-label>
+          </ion-item>
+          
+          <ion-item *ngIf="book?.genres && book.genres.length > 0">
+            <ion-label>
+              <strong>Genres:</strong> {{ book.genres.join(', ') }}
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div *ngIf="selectedTab === 'history'" class="history-tab">
+      <div *ngIf="isLoadingHistory" class="loading-container">
+        <ion-spinner></ion-spinner>
+        <p>Loading history...</p>
+      </div>
+      
+      <div *ngIf="!isLoadingHistory && bookHistory.length === 0" class="empty-state">
+        <ion-icon name="time-outline"></ion-icon>
+        <p>No history available for this book</p>
+      </div>
+      
+      <ion-list *ngIf="!isLoadingHistory && bookHistory.length > 0">
+        <ion-item *ngFor="let event of bookHistory">
+          <ion-label>
+            <h3>{{ event.eventType }}</h3>
+            <p>{{ event.sourceTitle }}</p>
+            <p class="event-date">{{ formatDate(event.date) }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Files Tab -->
+    <div *ngIf="selectedTab === 'files'" class="files-tab">
+      <div *ngIf="isLoadingFiles" class="loading-container">
+        <ion-spinner></ion-spinner>
+        <p>Loading files...</p>
+      </div>
+      
+      <div *ngIf="!isLoadingFiles && bookFiles.length === 0" class="empty-state">
+        <ion-icon name="folder-open-outline"></ion-icon>
+        <p>No files available for this book</p>
+      </div>
+      
+      <ion-list *ngIf="!isLoadingFiles && bookFiles.length > 0">
+        <ion-item *ngFor="let file of bookFiles">
+          <ion-label>
+            <h3>{{ file.path.split('/').pop() }}</h3>
+            <p>Size: {{ formatFileSize(file.size) }}</p>
+            <p *ngIf="file.quality?.quality?.name">Quality: {{ file.quality.quality.name }}</p>
+            <p *ngIf="file.mediaInfo">
+              Audio: {{ file.mediaInfo.audioCodec }} - {{ file.mediaInfo.audioBitrate }} - {{ file.mediaInfo.audioChannels }}ch
+            </p>
+            <p class="file-date">Added: {{ formatDate(file.dateAdded) }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+  </div>
+</ion-content>

@@ -1,3 +1,11 @@
+/* Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font Awesome */
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
@@ -35,3 +43,139 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Custom Theme Variables */
+:root {
+  /* Ionic brand palette */
+  --ion-color-primary: #6366f1;
+  --ion-color-primary-rgb: 99,102,241;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade: #575ad4;
+  --ion-color-primary-tint: #7375f2;
+  
+  --ion-color-secondary: #10b981;
+  --ion-color-secondary-rgb: 16,185,129;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255,255,255;
+  --ion-color-secondary-shade: #0ea271;
+  --ion-color-secondary-tint: #28c08e;
+  
+  --ion-color-tertiary: #a78bfa;
+  --ion-color-success: #22c55e;
+  --ion-color-warning: #f59e0b;
+  --ion-color-danger: #ef4444;
+
+  /* Base surfaces and text */
+  --ion-background-color: #ffffff;
+  --ion-text-color: #0f172a;
+
+  /* Tailwind bridge (RGB channels) */
+  --color-bg: 255 255 255;
+  --color-surface: 248 250 252; /* slate-50 */
+  --color-text: 15 23 42;       /* slate-900 */
+  --color-muted: 100 116 139;   /* slate-500 */
+  --color-card: 241 245 249;    /* slate-100 */
+  --ring: 99 102 241;           /* brand-500 */
+
+  color-scheme: light;
+}
+
+.dark {
+  /* Slightly shifted brand for dark for better contrast */
+  --ion-color-primary: #818cf8;
+  --ion-color-primary-rgb: 129,140,248;
+  --ion-color-primary-shade: #7179db;
+  --ion-color-primary-tint: #8e98f9;
+  
+  --ion-background-color: #0b1220; /* deep blue-black */
+  --ion-text-color: #e2e8f0;
+  --ion-toolbar-background: rgb(17 24 39 / 0.8);
+  --ion-toolbar-color: #e2e8f0;
+  --ion-item-background: rgb(24 32 48);
+
+  /* Tailwind bridge */
+  --color-bg: 11 18 32;
+  --color-surface: 17 24 39;  /* slate-900 */
+  --color-text: 226 232 240;  /* slate-200 */
+  --color-muted: 148 163 184; /* slate-400 */
+  --color-card: 24 32 48;
+  --ring: 129 140 248;        /* brand-400/500 */
+
+  color-scheme: dark;
+}
+
+/* Utility classes */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Custom Action Sheet Styles */
+.sort-action-sheet {
+  .action-sheet-button {
+    &.action-sheet-selected {
+      color: var(--ion-color-primary);
+      font-weight: 600;
+    }
+  }
+}
+
+/* Chip styles */
+ion-chip {
+  --background: var(--ion-color-step-100);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    --background: var(--ion-color-step-150);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Book Detail Modal Sheet */
+ion-modal.book-detail-modal {
+  --border-radius: 16px 16px 0 0;
+  --background: var(--ion-background-color);
+  
+  ion-header {
+    ion-toolbar {
+      --background: var(--ion-toolbar-background, var(--ion-background-color));
+      --color: var(--ion-text-color);
+      --border-width: 0;
+      padding-top: 6px;
+      
+      ion-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  ion-content {
+    --background: var(--ion-background-color);
+  }
+  
+  .modal-handle {
+    width: 36px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--ion-color-step-350);
+    margin: 8px auto;
+  }
+}
+
+.dark ion-modal.book-detail-modal {
+  ion-header ion-toolbar {
+    --background: rgb(17 24 39);
+    --color: #e2e8f0;
+  }
+  
+  .book-header {
+    background: rgb(24 32 48);
+    border-bottom-color: rgb(30 41 59);
+  }
+}

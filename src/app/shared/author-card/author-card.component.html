@@ -1,0 +1,18 @@
+<ion-card [routerLink]="['/author', author.id]" class="overflow-hidden rounded-xl bg-card shadow-sm dark:shadow-none cursor-pointer">
+  <div class="relative aspect-[3/4] bg-surface">
+    <img [src]="author.imageUrl"
+         [alt]="author.firstName + ' ' + author.lastName"
+         loading="lazy"
+         class="h-full w-full object-cover" />
+    <ion-badge color="primary" class="absolute left-2 top-2">
+      <i class="fa-solid fa-book mr-1"></i>
+      {{ author.monitoredBookCount }} / {{ author.bookCount }}
+    </ion-badge>
+  </div>
+
+  <ion-card-header class="p-3">
+    <ion-card-title class="text-text text-sm font-semibold line-clamp-1">
+      {{ author.firstName }} {{ author.lastName }}
+    </ion-card-title>
+  </ion-card-header>
+</ion-card>

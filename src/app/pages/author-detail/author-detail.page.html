@@ -1,0 +1,116 @@
+<ion-header [translucent]="true" class="dark:!bg-transparent">
+  <ion-toolbar class="bg-surface/80 backdrop-blur">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/library" text="Library"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="font-semibold" *ngIf="author$ | async as author">
+      {{ author.firstName }} {{ author.lastName }}
+    </ion-title>
+    <ion-buttons slot="end" *ngIf="author$ | async as author">
+      <ion-button (click)="toggleMonitored(author)">
+        <ion-icon slot="icon-only" 
+                  [name]="author.monitored ? 'eye-outline' : 'eye-off-outline'"
+                  [class.text-primary]="author.monitored"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="bg-bg">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="flex h-full items-center justify-center">
+    <ion-spinner name="crescent" class="text-primary"></ion-spinner>
+  </div>
+
+  <!-- Author content -->
+  <div *ngIf="!loading && (author$ | async) as author">
+    <!-- Author header card -->
+    <ion-card class="bg-card m-4 rounded-xl shadow-sm dark:shadow-none">
+      <div class="relative bg-surface rounded-t-xl overflow-hidden" style="height: 16rem;">
+        <!-- Blurred background image -->
+        <img [src]="author.imageUrl" 
+             [alt]="author.firstName + ' ' + author.lastName"
+             class="absolute inset-0 w-full h-full object-cover opacity-30 blur-xl scale-110" />
+        <!-- Main image -->
+        <img [src]="author.imageUrl" 
+             [alt]="author.firstName + ' ' + author.lastName"
+             class="relative w-full h-full object-contain z-10" />
+      </div>
+      <ion-card-header>
+        <ion-card-title class="text-text">
+          {{ author.firstName }} {{ author.lastName }}
+        </ion-card-title>
+        <p class="text-sm text-muted mt-1">
+          <i class="fa-solid fa-book mr-1"></i>
+          {{ author.monitoredBookCount }} / {{ author.bookCount }} books
+        </p>
+      </ion-card-header>
+      <ion-card-content *ngIf="author.overview" class="text-muted">
+        <div [class.line-clamp-4]="!bioExpanded" 
+             class="transition-all duration-300 whitespace-pre-line" 
+             [innerHTML]="formatBio(author.overview)">
+        </div>
+        <button 
+          *ngIf="shouldShowBioButton(author.overview)" 
+          (click)="toggleBio()"
+          class="mt-2 text-primary text-sm font-medium">
+          {{ bioExpanded ? 'Show less' : 'Show more' }}
+        </button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Media type selector -->
+    <div class="px-4 py-2">
+      <ion-segment [value]="mediaType" (ionChange)="segmentChanged($event)" class="bg-surface rounded-lg">
+        <ion-segment-button value="audiobook">
+          <ion-label>Audiobooks</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="ebook">
+          <ion-label>eBooks</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Search and sort controls -->
+    <div class="px-4 pb-2">
+      <ion-searchbar 
+        placeholder="Search books..." 
+        (ionInput)="onSearchBooks($event)" 
+        class="px-0"
+        [value]="bookSearchTerm">
+      </ion-searchbar>
+      <div class="flex items-center gap-2 mt-2">
+        <ion-chip (click)="presentBookSortOptions()" class="bg-card">
+          <ion-icon name="filter-outline" class="text-muted"></ion-icon>
+          <ion-label class="text-sm">{{ getBookSortLabel() }}</ion-label>
+        </ion-chip>
+        <ion-chip (click)="toggleBookOrder()" class="bg-card">
+          <ion-icon [name]="bookOrder === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'" class="text-muted"></ion-icon>
+          <ion-label class="text-sm">{{ bookOrder === 'asc' ? 'A-Z' : 'Z-A' }}</ion-label>
+        </ion-chip>
+        <div class="ml-auto text-xs text-muted" *ngIf="filteredBooks$ | async as filteredBooks">
+          {{ filteredBooks.length }} {{ mediaType === 'audiobook' ? 'audiobooks' : 'ebooks' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Books list -->
+    <ion-list class="bg-transparent px-2" *ngIf="filteredBooks$ | async as books">
+      <div *ngIf="books.length === 0" class="text-center py-8 text-muted">
+        <p *ngIf="!bookSearchTerm">No {{ mediaType === 'audiobook' ? 'audiobooks' : 'ebooks' }} found</p>
+        <p *ngIf="bookSearchTerm">No results for "{{ bookSearchTerm }}"</p>
+      </div>
+      <app-book-list-item 
+        *ngFor="let book of books" 
+        [book]="book"
+        [isDownloading]="isBookDownloading(book.id)"
+        [downloadProgress]="getDownloadProgress(book.id)"
+        (bookClick)="openBookDetail($event)">
+      </app-book-list-item>
+    </ion-list>
+  </div>
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+</ion-content>

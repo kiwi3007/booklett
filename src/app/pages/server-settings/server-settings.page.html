@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Server Settings</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <ion-list inset>
+      <ion-item>
+        <ion-input
+          label="Server URL"
+          label-placement="stacked"
+          placeholder="http://127.0.0.1:9797"
+          formControlName="url"
+          inputmode="url"
+          autocomplete="off">
+        </ion-input>
+      </ion-item>
+      <ion-note color="medium" class="ion-padding-start">
+        Examples: http://127.0.0.1:9797, https://mydomain.com<br>
+        Android emulator: use http://10.0.2.2:9797 for localhost
+      </ion-note>
+
+      <ion-item>
+        <ion-input
+          label="API Key"
+          label-placement="stacked"
+          formControlName="apiKey"
+          autocomplete="off">
+        </ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-padding-top">
+      <ion-button expand="block" type="submit">Save</ion-button>
+    </div>
+  </form>
+</ion-content>

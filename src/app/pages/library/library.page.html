@@ -1,0 +1,54 @@
+<ion-header [translucent]="true" class="dark:!bg-transparent">
+  <ion-toolbar class="bg-surface/80 backdrop-blur">
+    <ion-title class="font-semibold">Library</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="setView('list')" [class.opacity-100]="(view$ | async) === 'list'" [class.opacity-50]="(view$ | async) !== 'list'">
+        <ion-icon slot="icon-only" name="list-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="setView('grid')" [class.opacity-100]="(view$ | async) === 'grid'" [class.opacity-50]="(view$ | async) !== 'grid'">
+        <ion-icon slot="icon-only" name="grid-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar class="bg-surface">
+    <ion-searchbar placeholder="Search authors" (ionInput)="onSearch($event)" class="px-2"></ion-searchbar>
+    <div class="flex items-center gap-2 px-4 pb-2">
+      <ion-chip (click)="presentSortOptions()" class="bg-card">
+        <ion-icon name="filter-outline" class="text-muted"></ion-icon>
+        <ion-label class="text-sm">{{ getSortLabel() }}</ion-label>
+      </ion-chip>
+      <ion-chip (click)="toggleOrder()" class="bg-card">
+        <ion-icon [name]="(order$ | async) === 'asc' ? 'arrow-up-outline' : 'arrow-down-outline'" class="text-muted"></ion-icon>
+        <ion-label class="text-sm">{{ (order$ | async) === 'asc' ? 'A-Z' : 'Z-A' }}</ion-label>
+      </ion-chip>
+      <div class="ml-auto text-xs text-muted">
+        {{ (authors$ | async)?.length || 0 }} authors
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="bg-bg">
+  <ng-container *ngIf="(view$ | async) as view">
+    <!-- Grid view -->
+    <div *ngIf="view === 'grid'; else listView"
+         class="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4">
+      <app-author-card *ngFor="let a of (authors$ | async); trackBy: trackById"
+                       [author]="a">
+      </app-author-card>
+    </div>
+
+    <!-- List view -->
+    <ng-template #listView>
+      <ion-list class="bg-transparent">
+        <app-author-list-item *ngFor="let a of (authors$ | async); trackBy: trackById"
+                              [author]="a">
+        </app-author-list-item>
+      </ion-list>
+    </ng-template>
+  </ng-container>
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+</ion-content>

@@ -1,0 +1,49 @@
+<ion-item lines="none" class="bg-card rounded-xl my-2" (click)="onBookClick()" button>
+  <ion-thumbnail slot="start" class="w-16 h-24">
+    <img [src]="bookImage" [alt]="book.title" loading="lazy" class="object-cover rounded" />
+  </ion-thumbnail>
+  <ion-label>
+    <h3 class="font-medium text-text">
+      {{ book.title }}
+    </h3>
+    <p class="text-muted text-sm mt-1" *ngIf="seriesName">
+      {{ seriesName }}
+      <span *ngIf="seriesPosition">#{{ seriesPosition }}</span>
+    </p>
+    <div class="flex items-center gap-3 mt-2">
+      <span class="text-xs text-muted" *ngIf="releaseYear">
+        <ion-icon name="calendar-outline" class="text-xs align-middle"></ion-icon>
+        {{ releaseYear }}
+      </span>
+      <span class="text-xs text-muted" *ngIf="book.ratings?.value">
+        <ion-icon name="star-outline" class="text-xs align-middle"></ion-icon>
+        {{ book.ratings.value | number:'1.1-1' }}
+      </span>
+    </div>
+  </ion-label>
+  
+  <!-- Download/File Status -->
+  <div slot="end" class="flex flex-col items-end gap-1">
+    <!-- Downloading indicator -->
+    <div *ngIf="isDownloading" class="flex items-center gap-2">
+      <ion-spinner name="dots" class="w-4 h-4 text-primary"></ion-spinner>
+      <span class="text-xs text-primary" *ngIf="downloadProgress">
+        {{ downloadProgress }}%
+      </span>
+    </div>
+    
+    <!-- File info when downloaded -->
+    <ion-chip *ngIf="hasFile && !isDownloading" class="h-6 m-0" color="success">
+      <ion-icon name="checkmark-circle-outline" class="text-xs"></ion-icon>
+      <span class="text-xs ml-1" *ngIf="fileInfo">
+        {{ fileInfo.format }}
+      </span>
+    </ion-chip>
+    
+    <!-- Monitored but no file -->
+    <ion-chip *ngIf="!hasFile && !isDownloading && book.monitored" class="h-6 m-0" color="medium">
+      <ion-icon name="cloud-download-outline" class="text-xs"></ion-icon>
+      <span class="text-xs ml-1">Missing</span>
+    </ion-chip>
+  </div>
+</ion-item>
