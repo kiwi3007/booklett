@@ -1,0 +1,20 @@
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--ion-color-danger-tint);
+  border-radius: 8px;
+  border: 1px solid var(--ion-color-danger);
+  
+  ion-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  p {
+    margin: 0;
+    color: var(--ion-text-color);
+    font-size: 14px;
+  }
+}

@@ -8,6 +8,14 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Show error message if connection failed -->
+  <ion-alert *ngIf="errorMessage" class="ion-margin-bottom">
+    <div class="error-alert">
+      <ion-icon name="warning-outline" color="danger"></ion-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+  </ion-alert>
+
   <form [formGroup]="form" (ngSubmit)="save()">
     <ion-list inset>
       <ion-item>

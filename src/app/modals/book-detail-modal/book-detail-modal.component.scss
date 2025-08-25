@@ -56,9 +56,25 @@
       }
     }
 
-    .monitor-button {
+    .monitor-chip {
       margin-top: auto;
       align-self: flex-start;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      height: 32px;
+      
+      &:hover:not([disabled]) {
+        transform: scale(1.02);
+      }
+      
+      &[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      ion-icon {
+        margin-right: 6px;
+      }
     }
   }
 }

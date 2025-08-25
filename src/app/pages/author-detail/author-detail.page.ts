@@ -1,41 +1,41 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar, 
-  IonButtons, 
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import {
+  ActionSheetController,
   IonBackButton,
-  IonSpinner,
-  IonList,
+  IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardTitle,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonButton,
+  IonChip,
+  IonContent,
+  IonHeader,
   IonIcon,
+  IonLabel,
+  IonList,
   IonRefresher,
   IonRefresherContent,
   IonSearchbar,
-  IonChip,
-  ActionSheetController,
+  IonSegment,
+  IonSegmentButton,
+  IonSpinner,
+  IonTitle,
+  IonToolbar,
   ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { eyeOutline, eyeOffOutline, filterOutline, arrowUpOutline, arrowDownOutline } from 'ionicons/icons';
-import { Observable, switchMap, tap, combineLatest, map, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { arrowDownOutline, arrowUpOutline, eyeOffOutline, eyeOutline, filterOutline } from 'ionicons/icons';
+import { BehaviorSubject, combineLatest, firstValueFrom, map, Observable, switchMap, tap } from 'rxjs';
 import { Author } from '../../core/models/author.model';
 import { Book } from '../../core/models/book.model';
 import { AuthorService } from '../../core/services/author.service';
-import { BookListItemComponent } from '../../shared/book-list-item/book-list-item.component';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BookDetailModalComponent } from '../../modals/book-detail-modal/book-detail-modal.component';
+import { BookListItemComponent } from '../../shared/book-list-item/book-list-item.component';
 
 @Component({
   selector: 'app-author-detail',
@@ -44,9 +44,9 @@ import { BookDetailModalComponent } from '../../modals/book-detail-modal/book-de
   standalone: true,
   imports: [
     CommonModule,
-    IonContent, 
-    IonHeader, 
-    IonTitle, 
+    IonContent,
+    IonHeader,
+    IonTitle,
     IonToolbar,
     IonButtons,
     IonBackButton,
@@ -77,7 +77,7 @@ export class AuthorDetailPage implements OnInit {
   bioExpanded = false;
   bookFiles: any[] = [];
   downloadQueue: any[] = [];
-  
+
   // Book search and sort
   bookSearchTerm = '';
   bookSort: 'title' | 'releaseDate' | 'series' | 'rating' = 'title';
@@ -91,12 +91,12 @@ export class AuthorDetailPage implements OnInit {
     private sanitizer: DomSanitizer,
     private modalController: ModalController
   ) {
-    addIcons({ 
-      eyeOutline, 
-      eyeOffOutline, 
-      filterOutline, 
-      arrowUpOutline, 
-      arrowDownOutline 
+    addIcons({
+      eyeOutline,
+      eyeOffOutline,
+      filterOutline,
+      arrowUpOutline,
+      arrowDownOutline
     });
   }
 
@@ -122,7 +122,7 @@ export class AuthorDetailPage implements OnInit {
     ).subscribe(([books, bookFiles]) => {
       // Store book files
       this.bookFiles = bookFiles;
-      
+
       // Merge book file info into books
       const booksWithFiles = books.map(book => {
         const matchingFiles = bookFiles.filter((f: any) => f.bookId === book.id);
@@ -131,10 +131,10 @@ export class AuthorDetailPage implements OnInit {
           bookFiles: { value: matchingFiles, isLoaded: true }
         };
       });
-      
+
       this.booksSubject.next(booksWithFiles);
     });
-    
+
     // Set up filtered books observable
     this.filteredBooks$ = this.booksSubject.pipe(
       map(books => this.filterAndSortBooks(books))
@@ -156,7 +156,7 @@ export class AuthorDetailPage implements OnInit {
     ).subscribe(([books, bookFiles]) => {
       // Store book files
       this.bookFiles = bookFiles;
-      
+
       // Merge book file info into books
       const booksWithFiles = books.map(book => {
         const matchingFiles = bookFiles.filter((f: any) => f.bookId === book.id);
@@ -165,7 +165,7 @@ export class AuthorDetailPage implements OnInit {
           bookFiles: { value: matchingFiles, isLoaded: true }
         };
       });
-      
+
       this.booksSubject.next(booksWithFiles);
     });
   }
@@ -174,14 +174,14 @@ export class AuthorDetailPage implements OnInit {
     try {
       await Haptics.impact({ style: ImpactStyle.Light });
     } catch {}
-    
+
     this.authorService.toggleMonitored(author.id).subscribe();
   }
 
   handleRefresh(event: any) {
     // Refresh author, books, and book files
     const authorId = this.route.snapshot.params['id'];
-    
+
     combineLatest([
       this.authorService.loadAuthors(),
       this.authorService.getAuthorBooks(authorId, this.mediaType),
@@ -189,7 +189,7 @@ export class AuthorDetailPage implements OnInit {
     ]).subscribe(([authors, books, bookFiles]) => {
       // Store book files
       this.bookFiles = bookFiles;
-      
+
       // Merge book file info into books
       const booksWithFiles = books.map(book => {
         const matchingFiles = bookFiles.filter((f: any) => f.bookId === book.id);
@@ -198,7 +198,7 @@ export class AuthorDetailPage implements OnInit {
           bookFiles: { value: matchingFiles, isLoaded: true }
         };
       });
-      
+
       this.booksSubject.next(booksWithFiles);
       event.target.complete();
     });
@@ -215,7 +215,7 @@ export class AuthorDetailPage implements OnInit {
 
   formatBio(bio: string): SafeHtml {
     if (!bio) return '';
-    
+
     // First, strip out all HTML tags except line breaks
     let cleanBio = bio
       // Preserve line breaks by converting them to newlines
@@ -233,7 +233,7 @@ export class AuthorDetailPage implements OnInit {
       // Trim excessive whitespace
       .replace(/\n\s*\n\s*\n/g, '\n\n') // Max 2 newlines in a row
       .trim();
-    
+
     return this.sanitizer.sanitize(1, cleanBio) || cleanBio;
   }
 
@@ -245,7 +245,7 @@ export class AuthorDetailPage implements OnInit {
 
   filterAndSortBooks(books: Book[]): Book[] {
     let filtered = [...books];
-    
+
     // Apply search filter
     if (this.bookSearchTerm) {
       const searchLower = this.bookSearchTerm.toLowerCase();
@@ -255,7 +255,7 @@ export class AuthorDetailPage implements OnInit {
         return title.includes(searchLower) || series.includes(searchLower);
       });
     }
-    
+
     // Apply sorting
     const dir = this.bookOrder === 'asc' ? 1 : -1;
     filtered.sort((a, b) => {
@@ -283,7 +283,7 @@ export class AuthorDetailPage implements OnInit {
           return 0;
       }
     });
-    
+
     return filtered;
   }
 
@@ -326,7 +326,7 @@ export class AuthorDetailPage implements OnInit {
         }
       ]
     });
-    
+
     await actionSheet.present();
   }
 
@@ -352,7 +352,7 @@ export class AuthorDetailPage implements OnInit {
 
   getDownloadProgress(bookId: number): number | undefined {
     const queueItem = this.downloadQueue.find((item: any) => item.bookId === bookId);
-    return queueItem?.sizeleft && queueItem?.size 
+    return queueItem?.sizeleft && queueItem?.size
       ? Math.round((1 - queueItem.sizeleft / queueItem.size) * 100)
       : undefined;
   }
@@ -366,18 +366,21 @@ export class AuthorDetailPage implements OnInit {
         author
       },
       breakpoints: [0, 0.25, 0.5, 0.75, 1],
-      initialBreakpoint: 0.5,
-      cssClass: 'book-detail-modal'
+      initialBreakpoint: 0.75,
+      canDismiss: true,
+      handleBehavior: 'cycle',
+      cssClass: 'book-detail-modal',
+      expandToScroll: false,
     });
 
     await modal.present();
 
     const { data } = await modal.onWillDismiss();
-    
+
     // If the book was updated (e.g., monitored status changed), update our local list
     if (data?.updatedBook) {
       const currentBooks = this.booksSubject.value;
-      const updatedBooks = currentBooks.map(b => 
+      const updatedBooks = currentBooks.map(b =>
         b.id === data.updatedBook.id ? { ...b, ...data.updatedBook } : b
       );
       this.booksSubject.next(updatedBooks);

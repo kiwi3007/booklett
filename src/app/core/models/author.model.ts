@@ -57,8 +57,8 @@ export interface Author {
   lastName: string;
   imageUrl?: string;
   monitored: boolean;
-  bookCount: number;        // Total number of books
-  monitoredBookCount: number; // Number of monitored books
+  bookCount: number;        // Total number of books (totalBookCount from API)
+  availableBookCount: number; // Number of available books
   overview?: string;
   path?: string;
   sizeOnDisk?: number;
@@ -87,7 +87,7 @@ export function mapChaptarrAuthorToAuthor(chaptarrAuthor: ChaptarrAuthor): Autho
     imageUrl: posterImage?.url,
     monitored: chaptarrAuthor.monitored,
     bookCount: chaptarrAuthor.statistics?.totalBookCount || 0,
-    monitoredBookCount: chaptarrAuthor.statistics?.bookCount || 0,
+    availableBookCount: chaptarrAuthor.statistics?.availableBookCount || 0,
     overview: chaptarrAuthor.overview,
     path: chaptarrAuthor.path,
     sizeOnDisk: chaptarrAuthor.statistics?.sizeOnDisk

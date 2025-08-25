@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { 
   IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, 
-  IonContent, IonList, IonItem, IonInput, IonNote,
+  IonContent, IonList, IonItem, IonInput, IonNote, IonAlert, IonIcon,
   ModalController, ToastController 
 } from '@ionic/angular/standalone';
 import { ServerSettingsService } from '../../core/services/server-settings.service';
+import { addIcons } from 'ionicons';
+import { warningOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-server-settings',
@@ -15,11 +17,13 @@ import { ServerSettingsService } from '../../core/services/server-settings.servi
     CommonModule, 
     ReactiveFormsModule,
     IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
-    IonContent, IonList, IonItem, IonInput, IonNote
+    IonContent, IonList, IonItem, IonInput, IonNote, IonAlert, IonIcon
   ],
   templateUrl: './server-settings.page.html',
 })
 export class ServerSettingsPage implements OnInit {
+  @Input() errorMessage?: string;
+  
   private fb = inject(FormBuilder);
   private svc = inject(ServerSettingsService);
   private modalCtrl = inject(ModalController);
@@ -31,6 +35,10 @@ export class ServerSettingsPage implements OnInit {
   });
 
   firstRun = false;
+
+  constructor() {
+    addIcons({ warningOutline });
+  }
 
   async ngOnInit() {
     const present = this.svc.ensureDefaults();

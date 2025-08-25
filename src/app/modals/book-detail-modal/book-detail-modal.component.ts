@@ -4,6 +4,19 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { BookService, BookFile, BookHistory } from '../../core/services/book.service';
 import { firstValueFrom } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { 
+  close, 
+  star, 
+  checkmarkCircle, 
+  addCircleOutline,
+  calendarOutline,
+  timeOutline,
+  documentTextOutline,
+  libraryOutline,
+  folderOpenOutline,
+  time as timeIcon
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-book-detail-modal',
@@ -22,13 +35,49 @@ export class BookDetailModalComponent implements OnInit {
   isLoadingFiles = false;
   isLoadingHistory = false;
   isUpdatingMonitor = false;
+  authorName = '';
+  genresList: string[] = [];
 
   constructor(
     private modalController: ModalController,
     private bookService: BookService
-  ) {}
+  ) {
+    // Register all required icons
+    addIcons({ 
+      close, 
+      star, 
+      checkmarkCircle, 
+      addCircleOutline,
+      calendarOutline,
+      timeOutline,
+      documentTextOutline,
+      libraryOutline,
+      folderOpenOutline,
+      timeIcon,
+      'checkmark-circle': checkmarkCircle,
+      'add-circle-outline': addCircleOutline,
+      'calendar-outline': calendarOutline,
+      'time-outline': timeOutline,
+      'document-text-outline': documentTextOutline,
+      'library-outline': libraryOutline,
+      'folder-open-outline': folderOpenOutline,
+      'time': timeIcon
+    });
+  }
 
   ngOnInit() {
+    // Set author name from either the passed author or the book's author
+    if (this.author?.authorName) {
+      this.authorName = this.author.authorName;
+    } else if (this.book?.authorName) {
+      this.authorName = this.book.authorName;
+    }
+    
+    // Extract genres from the book object
+    if (this.book?.genres && Array.isArray(this.book.genres)) {
+      this.genresList = this.book.genres;
+    }
+    
     // Load files and history when modal opens
     this.loadBookFiles();
     this.loadBookHistory();

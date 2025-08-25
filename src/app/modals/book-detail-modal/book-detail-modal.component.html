@@ -18,7 +18,7 @@
     </div>
     <div class="book-info">
       <h2>{{ book?.title }}</h2>
-      <p class="author-name">by {{ author?.authorName || book?.authorName }}</p>
+      <p class="author-name" *ngIf="authorName">by {{ authorName }}</p>
       
       <div class="book-metadata">
         <div class="metadata-item" *ngIf="book?.seriesTitle">
@@ -47,15 +47,15 @@
         </div>
       </div>
 
-      <!-- Monitor Toggle Button -->
-      <ion-button 
-        class="monitor-button"
+      <!-- Monitor Toggle Chip -->
+      <ion-chip 
+        class="monitor-chip"
         [color]="book?.monitored ? 'success' : 'medium'"
         (click)="toggleMonitor()"
         [disabled]="isUpdatingMonitor">
-        <ion-icon [name]="book?.monitored ? 'checkmark-circle' : 'add-circle-outline'" slot="start"></ion-icon>
-        {{ book?.monitored ? 'Monitored' : 'Not Monitored' }}
-      </ion-button>
+        <ion-icon [name]="book?.monitored ? 'checkmark-circle' : 'add-circle-outline'"></ion-icon>
+        <ion-label>{{ book?.monitored ? 'Monitored' : 'Not Monitored' }}</ion-label>
+      </ion-chip>
     </div>
   </div>
 
@@ -109,9 +109,9 @@
             </ion-label>
           </ion-item>
           
-          <ion-item *ngIf="book?.genres && book.genres.length > 0">
+          <ion-item *ngIf="genresList.length > 0">
             <ion-label>
-              <strong>Genres:</strong> {{ book.genres.join(', ') }}
+              <strong>Genres:</strong> {{ genresList.join(', ') }}
             </ion-label>
           </ion-item>
         </ion-list>
