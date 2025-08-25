@@ -47,8 +47,8 @@
       </ion-card-header>
       <ion-card-content *ngIf="author.overview" class="text-muted">
         <div [class.line-clamp-4]="!bioExpanded" 
-             class="transition-all duration-300 whitespace-pre-line" 
-             [innerHTML]="formatBio(author.overview)">
+             class="transition-all duration-300 whitespace-pre-wrap">
+          {{ formatBio(author.overview) }}
         </div>
         <button 
           *ngIf="shouldShowBioButton(author.overview)" 

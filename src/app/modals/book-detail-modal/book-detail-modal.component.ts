@@ -1,22 +1,23 @@
-import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BookService, BookFile, BookHistory } from '../../core/services/book.service';
-import { firstValueFrom } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { 
-  close, 
-  star, 
-  checkmarkCircle, 
+import {
   addCircleOutline,
   calendarOutline,
-  timeOutline,
+  checkmarkCircle,
+  close,
   documentTextOutline,
-  libraryOutline,
   folderOpenOutline,
-  time as timeIcon
+  libraryOutline,
+  star,
+  time as timeIcon,
+  timeOutline
 } from 'ionicons/icons';
+import { firstValueFrom } from 'rxjs';
+import { BookFile, BookHistory, BookService } from '../../core/services/book.service';
 
 @Component({
   selector: 'app-book-detail-modal',
@@ -40,13 +41,14 @@ export class BookDetailModalComponent implements OnInit {
 
   constructor(
     private modalController: ModalController,
-    private bookService: BookService
+    private bookService: BookService,
+    private sanitizer: DomSanitizer
   ) {
     // Register all required icons
-    addIcons({ 
-      close, 
-      star, 
-      checkmarkCircle, 
+    addIcons({
+      close,
+      star,
+      checkmarkCircle,
       addCircleOutline,
       calendarOutline,
       timeOutline,
@@ -66,18 +68,24 @@ export class BookDetailModalComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Set author name from either the passed author or the book's author
-    if (this.author?.authorName) {
-      this.authorName = this.author.authorName;
+    // Set author name from either the passed author or the book's nested author
+    console.log('Author', this.author);
+    console.log('Book', this.book);
+    if (this.author?.firstName || this.author?.lastName) {
+      this.authorName = [this.author.firstName, this.author.lastName].join(' ');
+    } else if (this.book?.author?.value?.name) {
+      this.authorName = this.book.author.value.name;
+    } else if (this.book?.authorMetadata?.value?.name) {
+      this.authorName = this.book.authorMetadata.value.name;
     } else if (this.book?.authorName) {
       this.authorName = this.book.authorName;
     }
-    
+
     // Extract genres from the book object
-    if (this.book?.genres && Array.isArray(this.book.genres)) {
-      this.genresList = this.book.genres;
+    if (this.book?.genres) {
+      this.genresList = this.book.genres.split(',');
     }
-    
+
     // Load files and history when modal opens
     this.loadBookFiles();
     this.loadBookHistory();
@@ -89,7 +97,7 @@ export class BookDetailModalComponent implements OnInit {
 
   selectTab(tab: string) {
     this.selectedTab = tab;
-    
+
     // Load data if not already loaded
     if (tab === 'files' && this.bookFiles.length === 0 && !this.isLoadingFiles) {
       this.loadBookFiles();
@@ -100,7 +108,7 @@ export class BookDetailModalComponent implements OnInit {
 
   async toggleMonitor() {
     if (this.isUpdatingMonitor) return;
-    
+
     this.isUpdatingMonitor = true;
     try {
       const updatedBook = await firstValueFrom(
@@ -109,7 +117,7 @@ export class BookDetailModalComponent implements OnInit {
           !this.book.monitored
         )
       );
-      
+
       if (updatedBook) {
         this.book.monitored = updatedBook.monitored;
         // Dismiss with the updated book so parent can update its list
@@ -183,5 +191,78 @@ export class BookDetailModalComponent implements OnInit {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  }
+
+  hasAdditionalInfo(): boolean {
+    // Check if editions exist and have the needed fields
+    const editions = this.book?.editions?.value;
+    if (editions && editions.length > 0) {
+      const edition = editions.find((e: any) => e.monitored) || editions[0];
+      if (edition?.publisher || edition?.asin || edition?.isbn13) {
+        return true;
+      }
+    }
+
+    // Check direct book properties
+    return !!(this.book?.publisher ||
+              this.book?.narrator ||
+              this.book?.asin ||
+              this.book?.isbn ||
+              (this.genresList && this.genresList.length > 0));
+  }
+
+  getPublisher(): string | null {
+    if (this.book?.publisher) return this.book.publisher;
+    const editions = this.book?.editions?.value;
+    if (editions && editions.length > 0) {
+      const edition = editions.find((e: any) => e.monitored) || editions[0];
+      return edition?.publisher || null;
+    }
+    return null;
+  }
+
+  getAsin(): string | null {
+    if (this.book?.asin) return this.book.asin;
+    const editions = this.book?.editions?.value;
+    if (editions && editions.length > 0) {
+      const edition = editions.find((e: any) => e.monitored) || editions[0];
+      return edition?.asin || null;
+    }
+    return null;
+  }
+
+  getIsbn(): string | null {
+    if (this.book?.isbn) return this.book.isbn;
+    const editions = this.book?.editions?.value;
+    if (editions && editions.length > 0) {
+      const edition = editions.find((e: any) => e.monitored) || editions[0];
+      return edition?.isbn13 || null;
+    }
+    return null;
+  }
+
+  formatOverview(overview: string): string {
+    if (!overview) return '';
+
+    // First decode HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = overview;
+    let decodedText = textarea.value;
+
+    // Clean and format the text
+    let cleanOverview = decodedText
+      // Handle paragraph tags - must do closing tags first
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<p[^>]*>/gi, '')
+      // Replace line breaks with single newlines
+      .replace(/<br\s*\/?>/gi, '\n')
+      // Strip all remaining HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Clean up excessive whitespace
+      .replace(/\n\s*\n\s*\n+/g, '\n\n') // Max 2 newlines in a row
+      .replace(/^\s+|\s+$/g, '') // Trim start and end
+      .trim();
+
+    return cleanOverview;
   }
 }

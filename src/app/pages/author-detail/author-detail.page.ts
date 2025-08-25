@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import {
@@ -213,28 +213,29 @@ export class AuthorDetailPage implements OnInit {
     return overview ? overview.length > 300 : false;
   }
 
-  formatBio(bio: string): SafeHtml {
+  formatBio(bio: string): string {
     if (!bio) return '';
 
-    // First, strip out all HTML tags except line breaks
-    let cleanBio = bio
-      // Preserve line breaks by converting them to newlines
+    // First decode HTML entities
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = bio;
+    let decodedText = textarea.value;
+
+    // Clean and format the text
+    let cleanBio = decodedText
+      // Handle paragraph tags - must do closing tags first
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<p[^>]*>/gi, '')
+      // Replace line breaks with single newlines
       .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<br>/gi, '\n')
-      // Strip all other HTML tags
+      // Strip all remaining HTML tags
       .replace(/<[^>]*>/g, '')
-      // Decode HTML entities
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&nbsp;/g, ' ')
-      // Trim excessive whitespace
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // Max 2 newlines in a row
+      // Clean up excessive whitespace
+      .replace(/\n\s*\n\s*\n+/g, '\n\n') // Max 2 newlines in a row
+      .replace(/^\s+|\s+$/g, '') // Trim start and end
       .trim();
 
-    return this.sanitizer.sanitize(1, cleanBio) || cleanBio;
+    return cleanBio;
   }
 
   onSearchBooks(event: any) {
@@ -370,7 +371,7 @@ export class AuthorDetailPage implements OnInit {
       canDismiss: true,
       handleBehavior: 'cycle',
       cssClass: 'book-detail-modal',
-      expandToScroll: false,
+      expandToScroll: false
     });
 
     await modal.present();
