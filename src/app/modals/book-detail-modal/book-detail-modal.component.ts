@@ -18,8 +18,8 @@ import {
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { ApiConfigService } from '../../core/services/api-config.service';
-import { getBookCoverUrl } from '../../core/utils/image-url.utils';
 import { BookFile, BookHistory, BookService } from '../../core/services/book.service';
+import { getBookCoverUrl } from '../../core/utils/image-url.utils';
 
 @Component({
   selector: 'app-book-detail-modal',
@@ -86,7 +86,9 @@ export class BookDetailModalComponent implements OnInit {
 
     // Extract genres from the book object
     if (this.book?.genres) {
-      this.genresList = this.book.genres.split(',');
+      this.genresList = Array.isArray(this.book.genres) ? this.book.genres : this.book.genres.split(',');
+      // Sort genres alphabetically
+      this.genresList.sort();
     }
 
     // Load files and history when modal opens
