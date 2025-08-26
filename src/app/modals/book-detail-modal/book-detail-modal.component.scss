@@ -79,9 +79,9 @@
   }
 }
 
-ion-segment {
+// Segment styling is handled in global.scss
+.segment-container {
   padding: 8px 16px;
-  background: var(--ion-background-color);
 }
 
 .tab-content {

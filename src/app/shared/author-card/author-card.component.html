@@ -1,10 +1,16 @@
 <ion-card [routerLink]="['/author', author.id]" class="overflow-hidden rounded-xl bg-card shadow-sm dark:shadow-none cursor-pointer">
-  <div class="relative aspect-[3/4] bg-surface">
+  <div class="relative aspect-[3/4] bg-surface overflow-hidden">
+    <!-- Blurred background image -->
     <img [src]="authorImage"
          [alt]="author.firstName + ' ' + author.lastName"
          loading="lazy"
-         class="h-full w-full object-cover" />
-    <ion-badge color="primary" class="absolute left-2 top-2">
+         class="absolute inset-0 w-full h-full object-cover opacity-20 blur-xl scale-110" />
+    <!-- Main image -->
+    <img [src]="authorImage"
+         [alt]="author.firstName + ' ' + author.lastName"
+         loading="lazy"
+         class="relative h-full w-full object-contain z-10" />
+    <ion-badge color="primary" class="absolute left-2 top-2 z-20">
       <i class="fa-solid fa-book mr-1"></i>
       {{ author.availableBookCount }} / {{ author.bookCount }}
     </ion-badge>

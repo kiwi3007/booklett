@@ -14,10 +14,22 @@ export class ThemeService {
 
   async init() {
     const saved = (await this.prefs.getString(this.storageKey)) as Mode | null;
-    await this.setMode(saved ?? 'system');
+    const mode = saved ?? 'system';
+    this.mode$.next(mode);
+    
+    // Apply the theme immediately
+    if (mode === 'system') {
+      this.applySystem();
+    } else {
+      await this.apply(mode);
+    }
+    
+    // Listen for system theme changes
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    mq.addEventListener('change', () => {
-      if (this.mode$.value === 'system') this.applySystem();
+    mq.addEventListener('change', (e) => {
+      if (this.mode$.value === 'system') {
+        this.apply(e.matches ? 'dark' : 'light');
+      }
     });
   }
 
@@ -32,7 +44,7 @@ export class ThemeService {
   }
 
   toggleDark() {
-    const isDark = document.documentElement.classList.contains('dark');
+    const isDark = document.body.classList.contains('dark');
     this.setMode(isDark ? 'light' : 'dark');
   }
 
@@ -42,9 +54,19 @@ export class ThemeService {
   }
 
   private async apply(mode: 'light' | 'dark') {
-    document.documentElement.classList.toggle('dark', mode === 'dark');
+    // Remove and add classes to ensure proper application
+    if (mode === 'dark') {
+      document.body.classList.add('dark');
+      document.documentElement.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+      document.documentElement.classList.remove('dark');
+    }
+    
     try {
       await StatusBar.setStyle({ style: mode === 'dark' ? Style.Dark : Style.Light });
-    } catch {}
+    } catch {
+      // StatusBar not available in web browser
+    }
   }
 }

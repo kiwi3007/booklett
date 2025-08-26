@@ -8,7 +8,7 @@
     </ion-title>
     <ion-buttons slot="end" *ngIf="author$ | async as author">
       <ion-button (click)="toggleMonitored(author)">
-        <ion-icon slot="icon-only" 
+        <ion-icon slot="icon-only"
                   [name]="author.monitored ? 'eye-outline' : 'eye-off-outline'"
                   [class.text-primary]="author.monitored"></ion-icon>
       </ion-button>
@@ -28,11 +28,11 @@
     <ion-card class="bg-card m-4 rounded-xl shadow-sm dark:shadow-none">
       <div class="relative bg-surface rounded-t-xl overflow-hidden" style="height: 16rem;">
         <!-- Blurred background image -->
-        <img [src]="getAuthorImage(author)" 
+        <img [src]="getAuthorImage(author)"
              [alt]="author.firstName + ' ' + author.lastName"
-             class="absolute inset-0 w-full h-full object-cover opacity-30 blur-xl scale-110" />
+             class="absolute inset-0 w-full h-full object-cover opacity-50 dark:opacity-30 blur-xl scale-110" />
         <!-- Main image -->
-        <img [src]="getAuthorImage(author)" 
+        <img [src]="getAuthorImage(author)"
              [alt]="author.firstName + ' ' + author.lastName"
              class="relative w-full h-full object-contain z-10" />
       </div>
@@ -46,12 +46,12 @@
         </p>
       </ion-card-header>
       <ion-card-content *ngIf="author.overview" class="text-muted">
-        <div [class.line-clamp-4]="!bioExpanded" 
+        <div [class.line-clamp-4]="!bioExpanded"
              class="transition-all duration-300 whitespace-pre-wrap">
           {{ formatBio(author.overview) }}
         </div>
-        <button 
-          *ngIf="shouldShowBioButton(author.overview)" 
+        <button
+          *ngIf="shouldShowBioButton(author.overview)"
           (click)="toggleBio()"
           class="mt-2 text-primary text-sm font-medium">
           {{ bioExpanded ? 'Show less' : 'Show more' }}
@@ -73,9 +73,9 @@
 
     <!-- Search and sort controls -->
     <div class="px-4 pb-2">
-      <ion-searchbar 
-        placeholder="Search books..." 
-        (ionInput)="onSearchBooks($event)" 
+      <ion-searchbar
+        placeholder="Search books..."
+        (ionInput)="onSearchBooks($event)"
         class="px-0"
         [value]="bookSearchTerm">
       </ion-searchbar>
@@ -100,8 +100,8 @@
         <p *ngIf="!bookSearchTerm">No {{ mediaType === 'audiobook' ? 'audiobooks' : 'ebooks' }} found</p>
         <p *ngIf="bookSearchTerm">No results for "{{ bookSearchTerm }}"</p>
       </div>
-      <app-book-list-item 
-        *ngFor="let book of books" 
+      <app-book-list-item
+        *ngFor="let book of books"
         [book]="book"
         [isDownloading]="isBookDownloading(book.id)"
         [downloadProgress]="getDownloadProgress(book.id)"

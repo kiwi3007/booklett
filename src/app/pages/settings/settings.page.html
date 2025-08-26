@@ -14,7 +14,7 @@
   <ion-list inset="true" class="mt-4">
     <ion-item>
       <ion-label>Theme</ion-label>
-      <ion-segment value="system" (ionChange)="setTheme($any($event).detail.value)">
+      <ion-segment [value]="themeMode$ | async" (ionChange)="setTheme($any($event).detail.value)">
         <ion-segment-button value="light">Light</ion-segment-button>
         <ion-segment-button value="dark">Dark</ion-segment-button>
         <ion-segment-button value="system">System</ion-segment-button>

@@ -42,7 +42,7 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
 
 /* Custom Theme Variables */
 :root {
@@ -66,9 +66,16 @@
   --ion-color-warning: #f59e0b;
   --ion-color-danger: #ef4444;
 
-  /* Base surfaces and text */
+  /* Light mode defaults - always set on :root */
   --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255,255,255;
   --ion-text-color: #0f172a;
+  --ion-text-color-rgb: 15,23,42;
+  --ion-toolbar-background: #ffffff;
+  --ion-toolbar-color: #0f172a;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-border-color: #e5e7eb;
 
   /* Tailwind bridge (RGB channels) */
   --color-bg: 255 255 255;
@@ -77,22 +84,54 @@
   --color-muted: 100 116 139;   /* slate-500 */
   --color-card: 241 245 249;    /* slate-100 */
   --ring: 99 102 241;           /* brand-500 */
+  
+  /* Custom shadow for light mode */
+  --box-shadow-light: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --box-shadow-medium: 0 4px 6px rgba(0,0,0,0.1);
+  
+  /* Ionic color steps for light mode */
+  --ion-color-step-50: #f8f9fa;
+  --ion-color-step-100: #f1f3f5;
+  --ion-color-step-150: #e9ecef;
+  --ion-color-step-200: #dee2e6;
+  --ion-color-step-250: #ced4da;
+  --ion-color-step-300: #adb5bd;
+  --ion-color-step-350: #868e96;
+  --ion-color-step-400: #495057;
+  --ion-color-step-450: #343a40;
+  --ion-color-step-500: #212529;
+  --ion-color-step-550: #191c1f;
+  --ion-color-step-600: #121416;
+  --ion-color-step-650: #0d0f11;
+  --ion-color-step-700: #090a0c;
+  --ion-color-step-750: #060607;
+  --ion-color-step-800: #040404;
+  --ion-color-step-850: #020202;
+  --ion-color-step-900: #010101;
+  --ion-color-step-950: #000000;
 
   color-scheme: light;
 }
 
-.dark {
+/* Dark mode styles - support class on both body and :root */
+.dark,
+body.dark,
+:root.dark {
   /* Slightly shifted brand for dark for better contrast */
   --ion-color-primary: #818cf8;
   --ion-color-primary-rgb: 129,140,248;
   --ion-color-primary-shade: #7179db;
   --ion-color-primary-tint: #8e98f9;
   
-  --ion-background-color: #0b1220; /* deep blue-black */
-  --ion-text-color: #e2e8f0;
-  --ion-toolbar-background: rgb(17 24 39 / 0.8);
-  --ion-toolbar-color: #e2e8f0;
-  --ion-item-background: rgb(24 32 48);
+  --ion-background-color: #0b1220 !important; /* deep blue-black */
+  --ion-background-color-rgb: 11,18,32 !important;
+  --ion-text-color: #e2e8f0 !important;
+  --ion-text-color-rgb: 226,232,240 !important;
+  --ion-toolbar-background: rgb(17 24 39 / 0.8) !important;
+  --ion-toolbar-color: #e2e8f0 !important;
+  --ion-item-background: rgb(24 32 48) !important;
+  --ion-card-background: rgb(24 32 48) !important;
+  --ion-border-color: rgb(30 41 59) !important;
 
   /* Tailwind bridge */
   --color-bg: 11 18 32;
@@ -101,6 +140,31 @@
   --color-muted: 148 163 184; /* slate-400 */
   --color-card: 24 32 48;
   --ring: 129 140 248;        /* brand-400/500 */
+  
+  /* Custom shadow for dark mode */
+  --box-shadow-light: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.5);
+  --box-shadow-medium: 0 4px 6px rgba(0,0,0,0.3);
+  
+  /* Ionic color steps for dark mode */
+  --ion-color-step-50: #0b0c0d;
+  --ion-color-step-100: #121416;
+  --ion-color-step-150: #191c1f;
+  --ion-color-step-200: #1f2428;
+  --ion-color-step-250: #262c31;
+  --ion-color-step-300: #2d343a;
+  --ion-color-step-350: #343c43;
+  --ion-color-step-400: #3a444c;
+  --ion-color-step-450: #414c55;
+  --ion-color-step-500: #48545e;
+  --ion-color-step-550: #4f5c67;
+  --ion-color-step-600: #566470;
+  --ion-color-step-650: #5c6c79;
+  --ion-color-step-700: #637482;
+  --ion-color-step-750: #6a7c8b;
+  --ion-color-step-800: #718494;
+  --ion-color-step-850: #788c9d;
+  --ion-color-step-900: #7e94a6;
+  --ion-color-step-950: #859caf;
 
   color-scheme: dark;
 }
@@ -168,7 +232,8 @@ ion-modal.book-detail-modal {
   }
 }
 
-.dark ion-modal.book-detail-modal {
+.dark ion-modal.book-detail-modal,
+body.dark ion-modal.book-detail-modal {
   ion-header ion-toolbar {
     --background: rgb(17 24 39);
     --color: #e2e8f0;
@@ -239,4 +304,195 @@ textarea:-webkit-autofill:active {
   transition: background-color 5000s ease-in-out 0s;
   -webkit-text-fill-color: var(--ion-text-color) !important;
   background-color: transparent !important;
+}
+
+/* Theme-aware styles for all Ionic components */
+ion-card {
+  --background: var(--ion-card-background);
+  --color: var(--ion-text-color);
+}
+
+ion-item {
+  --background: var(--ion-item-background);
+  --color: var(--ion-text-color);
+  --border-color: var(--ion-border-color);
+}
+
+ion-list {
+  --background: var(--ion-background-color);
+}
+
+ion-toolbar {
+  --background: var(--ion-toolbar-background);
+  --color: var(--ion-toolbar-color);
+  --border-color: var(--ion-border-color);
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+ion-header {
+  --background: var(--ion-toolbar-background);
+}
+
+ion-searchbar {
+  --background: var(--ion-item-background);
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--ion-color-step-500);
+  --icon-color: var(--ion-color-step-500);
+  --clear-button-color: var(--ion-color-step-500);
+  --cancel-button-color: var(--ion-color-primary);
+}
+
+ion-badge {
+  --color: var(--ion-color-primary-contrast);
+}
+
+/* Segment base styles */
+ion-segment {
+  border-radius: 8px;
+}
+
+ion-segment-button {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Light mode segment styling - more specific selectors */
+:root:not(.dark) ion-segment,
+html:not(.dark) ion-segment,
+body:not(.dark) ion-segment {
+  --background: #f3f4f6 !important; /* gray-100 for subtle background */
+}
+
+:root:not(.dark) ion-segment-button,
+html:not(.dark) ion-segment-button,
+body:not(.dark) ion-segment-button {
+  --color: #6b7280 !important; /* gray-500 for unselected */
+  --color-hover: #374151 !important; /* gray-700 */
+  --color-focused: #4b5563 !important; /* gray-600 */
+  --color-checked: var(--ion-color-primary) !important; /* primary text when selected */
+  --background-checked: transparent !important; /* transparent background */
+  --indicator-color-checked: #e5e7eb !important; /* gray-200 for subtle indicator */
+  --indicator-color: #e5e7eb !important; /* gray-200 for indicator animation */
+}
+
+/* Dark mode segment styling */
+:root.dark ion-segment,
+html.dark ion-segment,
+body.dark ion-segment,
+.dark ion-segment {
+  --background: rgb(31 41 55) !important; /* gray-800 */
+}
+
+:root.dark ion-segment-button,
+html.dark ion-segment-button,
+body.dark ion-segment-button,
+.dark ion-segment-button {
+  --color: #9ca3af !important; /* gray-400 for unselected */
+  --color-hover: #d1d5db !important; /* gray-300 */
+  --color-focused: #cbd5e1 !important; /* gray-300 */
+  --color-checked: var(--ion-color-primary) !important; /* primary text when selected */
+  --background-checked: transparent !important; /* transparent background */
+  --indicator-color-checked: #374151 !important; /* gray-700 for subtle indicator */
+  --indicator-color: #374151 !important; /* gray-700 for indicator animation */
+}
+
+/* Additional override to ensure styles apply */
+ion-item ion-segment {
+  margin: 0;
+}
+
+ion-item ion-segment-button {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  min-height: 32px;
+  font-size: 0.875rem;
+}
+
+ion-tab-bar {
+  --background: var(--ion-toolbar-background);
+  --color: var(--ion-color-step-500);
+  --color-selected: var(--ion-color-primary);
+}
+
+ion-tab-button {
+  --color: var(--ion-color-step-500);
+  --color-selected: var(--ion-color-primary);
+  --background: transparent;
+  --background-focused: var(--ion-color-step-50);
+}
+
+/* Force proper background on app root and ion-app */
+ion-app {
+  background: var(--ion-background-color);
+}
+
+body {
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+/* Ensure text colors are applied */
+.text-muted {
+  color: var(--ion-color-step-500) !important;
+}
+
+.text-primary {
+  color: var(--ion-color-primary) !important;
+}
+
+.text-danger {
+  color: var(--ion-color-danger) !important;
+}
+
+.text-success {
+  color: var(--ion-color-success) !important;
+}
+
+/* Fix action sheet theming */
+ion-action-sheet {
+  --background: var(--ion-background-color);
+  --button-background: var(--ion-background-color);
+  --button-color: var(--ion-text-color);
+  --button-color-selected: var(--ion-color-primary);
+}
+
+/* Fix toast theming */
+ion-toast {
+  --background: var(--ion-color-step-850);
+  --color: var(--ion-color-step-50);
+  --button-color: var(--ion-color-primary);
+}
+
+/* Fix loading theming */
+ion-loading {
+  --background: var(--ion-background-color);
+  --spinner-color: var(--ion-color-primary);
+}
+
+/* Fix alert theming */
+ion-alert {
+  --background: var(--ion-background-color);
+  --max-width: 280px;
+  
+  .alert-wrapper {
+    background: var(--ion-background-color);
+  }
+  
+  .alert-head {
+    color: var(--ion-text-color);
+  }
+  
+  .alert-message {
+    color: var(--ion-text-color);
+  }
+  
+  .alert-button {
+    color: var(--ion-color-primary);
+  }
 }
