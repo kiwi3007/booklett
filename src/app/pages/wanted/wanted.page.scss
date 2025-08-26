@@ -1,0 +1,51 @@
+ion-item {
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+}
+
+ion-avatar {
+  cursor: pointer;
+}
+ion-avatar.selected {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+ion-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Multi-select actions: presence + symmetric in/out transitions */
+.wanted-actions {
+  max-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  pointer-events: none;
+  transition: max-height 220ms ease, padding-top 220ms ease;
+}
+
+.wanted-actions.active {
+  max-height: 56px; /* fits small-sized buttons */
+  padding-top: 12px; /* aligns with previous pt-3 spacing */
+  pointer-events: auto;
+}
+
+/* Buttons: fade+lift with stagger, works both entering and leaving */
+.wanted-actions ion-button {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+.wanted-actions.active ion-button {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Stagger on both enter/leave */
+.wanted-actions ion-button:nth-child(1) { transition-delay: 0ms; }
+.wanted-actions ion-button:nth-child(2) { transition-delay: 60ms; }
+.wanted-actions ion-button:nth-child(3) { transition-delay: 120ms; }

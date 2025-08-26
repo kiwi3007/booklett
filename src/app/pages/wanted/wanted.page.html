@@ -3,6 +3,63 @@
     <ion-title>Wanted</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="bg-bg p-4">
-  <div class="text-muted">Missing or wanted books will appear here.</div>
+
+<ion-content class="bg-bg">
+  <div class="px-4 flex items-center gap-2 justify-center wanted-actions" [class.active]="inMultiSelect">
+    <ion-button size="small" fill="solid" [color]="allSelectedInFiltered ? 'medium' : 'primary'" (click)="onToggleSelectAll()" [disabled]="selectingAll">
+      <i [ngClass]="allSelectedInFiltered ? 'fa-regular fa-square' : 'fa-solid fa-square-check'"></i>
+    </ion-button>
+    <ion-button size="small" fill="outline" color="primary" (click)="onBulkSearch()">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span class="ml-1">{{ selectedCount }}</span>
+    </ion-button>
+    <ion-button size="small" fill="outline" color="danger" (click)="onUnmonitorSelected()">
+      <i class="fa-regular fa-bookmark"></i>
+      <span class="ml-1">{{ selectedCount }}</span>
+    </ion-button>
+  </div>
+  <div class="px-4 py-0">
+    <ion-searchbar placeholder="Search wanted titles or authors" [value]="searchTerm" (ionInput)="onSearchInput($event)" debounce="0"></ion-searchbar>
+  </div>
+
+  <ng-container *ngIf="!loadingInitial; else loadingTpl">
+    <ion-list>
+      <ng-container *ngIf="(searchResults ? searchResults.length : items.length) > 0; else emptyTpl">
+        <ion-item button detail (click)="onItemClick(rec)" *ngFor="let rec of (searchResults ? searchResults : items)">
+          <ion-avatar slot="start" (click)="toggleSelect(rec, $event)" [class.selected]="isSelected(rec)">
+            <img [src]="rec.images?.[0]?.url || rec.author?.images?.[0]?.url" alt="cover" />
+          </ion-avatar>
+          <ion-label>
+            <h3>{{ rec.title }}</h3>
+            <p>{{ rec.author?.authorName || rec.authorTitle }}</p>
+            <p>Released: {{ rec.releaseDate | date: 'mediumDate' }}</p>
+          </ion-label>
+        </ion-item>
+      </ng-container>
+    </ion-list>
+
+    <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="!canLoadMore || !!searchTerm">
+      <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading more..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <!-- Bottom searching indicator to reduce layout shift when it disappears -->
+    <div *ngIf="searching && searchTerm" class="px-4 py-3 text-muted text-sm flex items-center gap-2 justify-center">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Searching...</span>
+    </div>
+  </ng-container>
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ng-template #loadingTpl>
+    <div class="p-6 flex items-center justify-center">
+      <ion-spinner name="bubbles"></ion-spinner>
+    </div>
+  </ng-template>
+
+  <ng-template #emptyTpl>
+    <div class="p-6 text-muted">No results.</div>
+  </ng-template>
 </ion-content>

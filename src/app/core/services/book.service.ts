@@ -37,6 +37,37 @@ export class BookService {
   constructor(private http: HttpClient) {}
 
   /**
+   * Get the paginated wanted/missing list
+   * Mirrors calls like /api/v1/wanted/missing?page=2&pageSize=20&sortDirection=descending&sortKey=releaseDate&includeAuthor=true&monitored=true
+   */
+  getWantedMissing(page: number, pageSize: number): Observable<{
+    page: number;
+    pageSize: number;
+    sortKey: string;
+    sortDirection: string;
+    totalRecords: number;
+    records: any[];
+  }> {
+    return this.http.get<{
+      page: number;
+      pageSize: number;
+      sortKey: string;
+      sortDirection: string;
+      totalRecords: number;
+      records: any[];
+    }>(`/api/v1/wanted/missing`, {
+      params: {
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        sortDirection: 'descending',
+        sortKey: 'releaseDate',
+        includeAuthor: 'true',
+        monitored: 'true'
+      }
+    });
+  }
+
+  /**
    * Get books for a specific author
    */
   getBooksByAuthor(authorId: number, mediaType: string = 'audiobook'): Observable<any[]> {
