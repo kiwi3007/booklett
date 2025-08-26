@@ -3,7 +3,7 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { 
   IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, 
-  IonContent, IonList, IonItem, IonInput, IonNote, IonAlert, IonIcon,
+  IonContent, IonList, IonItem, IonInput, IonAlert, IonIcon,
   ModalController, ToastController 
 } from '@ionic/angular/standalone';
 import { ServerSettingsService } from '../../core/services/server-settings.service';
@@ -17,7 +17,7 @@ import { warningOutline } from 'ionicons/icons';
     CommonModule, 
     ReactiveFormsModule,
     IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
-    IonContent, IonList, IonItem, IonInput, IonNote, IonAlert, IonIcon
+    IonContent, IonList, IonItem, IonInput, IonAlert, IonIcon
   ],
   templateUrl: './server-settings.page.html',
 })

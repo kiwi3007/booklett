@@ -179,3 +179,64 @@ ion-modal.book-detail-modal {
     border-bottom-color: rgb(30 41 59);
   }
 }
+
+/* Server Settings Modal - Bottom Sheet Style */
+ion-modal.server-settings-modal {
+  --border-radius: 16px 16px 0 0;
+  --background: var(--ion-background-color);
+  
+  ion-header ion-toolbar {
+    --background: var(--ion-toolbar-background, var(--ion-background-color));
+    --border-width: 0;
+  }
+  
+  ion-content {
+    --background: var(--ion-background-color);
+  }
+}
+
+/* Fix password field autofill background and border */
+ion-input[type="password"],
+ion-input[type="password"] input {
+  --background: var(--ion-item-background, transparent);
+  background: var(--ion-item-background, transparent) !important;
+  border: none !important;
+  outline: none !important;
+  
+  /* Override browser autofill styles */
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--ion-item-background, transparent) inset !important;
+    -webkit-text-fill-color: var(--ion-text-color) !important;
+    box-shadow: 0 0 0 30px var(--ion-item-background, transparent) inset !important;
+    background-color: var(--ion-item-background, transparent) !important;
+    background-clip: content-box !important;
+    border: none !important;
+    outline: none !important;
+  }
+}
+
+/* Remove borders from password input containers */
+ion-item:has(ion-input[type="password"]) {
+  --inner-border-width: 0;
+  --border-width: 0;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
+}
+
+/* Fix for all autofill inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: var(--ion-text-color) !important;
+  background-color: transparent !important;
+}

@@ -1,5 +1,5 @@
 export interface ServerSettings {
-  url: string;    // e.g., http://127.0.0.1:9797 or https://mydomain.com
+  url: string;    // e.g., http://127.0.0.1:8787 or https://mydomain.com
   apiKey: string; // required
 }
 

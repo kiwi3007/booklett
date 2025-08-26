@@ -40,8 +40,12 @@ export class TabsPage implements OnInit {
       componentProps: {
         errorMessage
       },
+      breakpoints: [0, 0.5, 0.75, 1],
+      initialBreakpoint: 0.5,
       canDismiss: false,
       backdropDismiss: false,
+      handleBehavior: 'cycle',
+      cssClass: 'server-settings-modal'
     });
     
     await modal.present();

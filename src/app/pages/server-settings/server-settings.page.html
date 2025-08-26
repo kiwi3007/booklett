@@ -22,23 +22,19 @@
         <ion-input
           label="Server URL"
           label-placement="stacked"
-          placeholder="http://127.0.0.1:9797"
+          placeholder="http://127.0.0.1:8787"
           formControlName="url"
           inputmode="url"
           autocomplete="off">
         </ion-input>
       </ion-item>
-      <ion-note color="medium" class="ion-padding-start">
-        Examples: http://127.0.0.1:9797, https://mydomain.com<br>
-        Android emulator: use http://10.0.2.2:9797 for localhost
-      </ion-note>
-
       <ion-item>
         <ion-input
           label="API Key"
           label-placement="stacked"
           formControlName="apiKey"
-          autocomplete="off">
+          autocomplete="off"
+          type="password">
         </ion-input>
       </ion-item>
     </ion-list>
