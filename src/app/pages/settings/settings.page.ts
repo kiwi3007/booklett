@@ -29,6 +29,18 @@ export class SettingsPage {
   setDefaultView(view: 'grid' | 'list') { 
     localStorage.setItem('library:view', view); 
   }
+  
+  setDefaultLibraryType(type: 'authors' | 'books') {
+    localStorage.setItem('library:type', type);
+  }
+  
+  getCurrentLibraryType(): 'authors' | 'books' {
+    return (localStorage.getItem('library:type') as 'authors' | 'books') || 'authors';
+  }
+  
+  getCurrentDefaultView(): 'grid' | 'list' {
+    return (localStorage.getItem('library:view') as 'grid' | 'list') || 'grid';
+  }
 
   async openServerSettings() {
     const modal = await this.modalCtrl.create({ 

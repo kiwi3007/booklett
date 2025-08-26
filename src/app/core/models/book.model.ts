@@ -1,6 +1,8 @@
 export interface Book {
   id: number;
   authorMetadataId: number;
+  authorId?: number;
+  authorTitle?: string; // Format: "lastName, firstName title"
   foreignBookId: string;
   titleSlug: string;
   title: string;

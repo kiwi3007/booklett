@@ -20,9 +20,19 @@
         <ion-segment-button value="system">System</ion-segment-button>
       </ion-segment>
     </ion-item>
+  </ion-list>
+
+  <ion-list inset="true" class="mt-4">
     <ion-item>
-      <ion-label>Default Library View</ion-label>
-      <ion-segment value="grid" (ionChange)="setDefaultView($any($event).detail.value)">
+      <ion-label>Default Library</ion-label>
+      <ion-segment [value]="getCurrentLibraryType()" (ionChange)="setDefaultLibraryType($any($event).detail.value)">
+        <ion-segment-button value="authors">Authors</ion-segment-button>
+        <ion-segment-button value="books">Books</ion-segment-button>
+      </ion-segment>
+    </ion-item>
+    <ion-item>
+      <ion-label>Default View</ion-label>
+      <ion-segment [value]="getCurrentDefaultView()" (ionChange)="setDefaultView($any($event).detail.value)">
         <ion-segment-button value="grid">Grid</ion-segment-button>
         <ion-segment-button value="list">List</ion-segment-button>
       </ion-segment>

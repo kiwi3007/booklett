@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { Book } from '../models/book.model';
 
 export interface BookFile {
   id: number;
@@ -34,6 +36,9 @@ export interface BookHistory {
   providedIn: 'root'
 })
 export class BookService {
+  private readonly booksCache$ = new BehaviorSubject<Book[] | null>(null);
+  private isLoadingBooks = false;
+  
   constructor(private http: HttpClient) {}
 
   /**
@@ -65,6 +70,57 @@ export class BookService {
         monitored: 'true'
       }
     });
+  }
+
+  /**
+   * Get all books - with caching
+   * Only fetches from API if not cached or force refresh is requested
+   */
+  getAllBooks(forceRefresh: boolean = false): Observable<Book[]> {
+    // If we have cached data and not forcing refresh, return cached data
+    if (!forceRefresh && this.booksCache$.value !== null) {
+      return of(this.booksCache$.value);
+    }
+    
+    // If already loading, return the current cache observable
+    if (this.isLoadingBooks && !forceRefresh) {
+      return of([]); // Return empty array while loading
+    }
+    
+    this.isLoadingBooks = true;
+    return this.http.get<Book[]>(`/api/v1/book`).pipe(
+      tap(books => {
+        this.booksCache$.next(books);
+        this.isLoadingBooks = false;
+      }),
+      catchError(error => {
+        console.error('Error loading books:', error);
+        this.isLoadingBooks = false;
+        // Return empty array on error but don't cache it
+        return of([]);
+      })
+    );
+  }
+  
+  /**
+   * Force refresh books from the API
+   */
+  refreshBooks(): Observable<Book[]> {
+    return this.getAllBooks(true);
+  }
+  
+  /**
+   * Get cached books synchronously (may be null if not loaded yet)
+   */
+  getCachedBooks(): Book[] | null {
+    return this.booksCache$.value;
+  }
+  
+  /**
+   * Clear the books cache
+   */
+  clearBooksCache(): void {
+    this.booksCache$.next(null);
   }
 
   /**

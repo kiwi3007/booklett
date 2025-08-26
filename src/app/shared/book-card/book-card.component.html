@@ -1,0 +1,27 @@
+<ion-card class="relative bg-card cursor-pointer hover:scale-105 transition-transform" (click)="openBook()">
+  <div class="aspect-[2/3] relative overflow-hidden">
+    <img 
+      [src]="coverImageUrl" 
+      [alt]="book.title"
+      class="w-full h-full object-cover"
+      loading="lazy"
+    />
+    
+    <!-- Monitored badge -->
+    <div class="absolute top-1 right-1">
+      <ion-badge *ngIf="book.monitored" color="success">
+        <ion-icon name="checkmark-circle" class="text-xs"></ion-icon>
+      </ion-badge>
+    </div>
+  </div>
+  
+  <ion-card-content class="p-2">
+    <h3 class="text-sm font-semibold line-clamp-2 mb-1">{{ book.title }}</h3>
+    <p class="text-xs text-muted line-clamp-1">{{ authorName }}</p>
+    
+    <!-- Release date -->
+    <p class="text-xs text-muted mt-1" *ngIf="book.releaseDate">
+      {{ book.releaseDate | date:'yyyy' }}
+    </p>
+  </ion-card-content>
+</ion-card>

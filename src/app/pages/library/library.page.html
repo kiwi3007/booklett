@@ -1,6 +1,20 @@
 <ion-header [translucent]="true" class="dark:!bg-transparent">
   <ion-toolbar class="bg-surface/80 backdrop-blur">
-    <ion-title class="font-semibold">Library</ion-title>
+    <ion-select 
+      slot="start" 
+      interface="popover" 
+      [value]="libraryType$ | async" 
+      (ionChange)="setLibraryType($event.detail.value)"
+      class="font-semibold ml-2 min-w-[120px] max-w-[150px]">
+      <ion-select-option value="authors">
+        <ion-icon name="people-outline" class="mr-2"></ion-icon>
+        Authors
+      </ion-select-option>
+      <ion-select-option value="books">
+        <ion-icon name="book-outline" class="mr-2"></ion-icon>
+        Books
+      </ion-select-option>
+    </ion-select>
     <ion-buttons slot="end">
       <ion-button (click)="setView('list')" [class.opacity-100]="(view$ | async) === 'list'" [class.opacity-50]="(view$ | async) !== 'list'">
         <ion-icon slot="icon-only" name="list-outline"></ion-icon>
@@ -11,7 +25,10 @@
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar class="bg-surface">
-    <ion-searchbar placeholder="Search authors" (ionInput)="onSearch($event)" class="px-2"></ion-searchbar>
+    <ion-searchbar 
+      [placeholder]="(libraryType$ | async) === 'authors' ? 'Search authors' : 'Search books'" 
+      (ionInput)="onSearch($event)" 
+      class="px-2"></ion-searchbar>
     <div class="flex items-center gap-2 px-4 pb-2">
       <ion-chip (click)="presentSortOptions()" class="bg-card">
         <ion-icon name="filter-outline" class="text-muted"></ion-icon>
@@ -22,31 +39,78 @@
         <ion-label class="text-sm">{{ (order$ | async) === 'asc' ? 'A-Z' : 'Z-A' }}</ion-label>
       </ion-chip>
       <div class="ml-auto text-xs text-muted">
-        {{ (authors$ | async)?.length || 0 }} authors
+        <ng-container *ngIf="(libraryType$ | async) === 'authors'">
+          {{ getDisplayedCount() }} / {{ getTotalCount() }} authors
+        </ng-container>
+        <ng-container *ngIf="(libraryType$ | async) === 'books'">
+          {{ getDisplayedCount() }} / {{ getTotalCount() }} books
+        </ng-container>
       </div>
     </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="bg-bg">
-  <ng-container *ngIf="(view$ | async) as view">
-    <!-- Grid view -->
-    <div *ngIf="view === 'grid'; else listView"
-         class="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4">
-      <app-author-card *ngFor="let a of (authors$ | async); trackBy: trackById"
-                       [author]="a">
-      </app-author-card>
-    </div>
+  <ng-container *ngIf="(libraryType$ | async) as libraryType">
+    <ng-container *ngIf="libraryType === 'authors'">
+      <!-- Loading spinner for authors -->
+      <div *ngIf="isLoadingAuthors" class="flex items-center justify-center h-full">
+        <ion-spinner name="crescent" color="primary" class="text-4xl"></ion-spinner>
+      </div>
+      
+      <ng-container *ngIf="!isLoadingAuthors && (view$ | async) as view">
+        <!-- Author Grid view -->
+        <div *ngIf="view === 'grid'; else authorListView"
+             class="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4">
+          <app-author-card *ngFor="let a of displayedAuthors; trackBy: trackById"
+                           [author]="a">
+          </app-author-card>
+        </div>
 
-    <!-- List view -->
-    <ng-template #listView>
-      <ion-list class="bg-transparent">
-        <app-author-list-item *ngFor="let a of (authors$ | async); trackBy: trackById"
-                              [author]="a">
-        </app-author-list-item>
-      </ion-list>
-    </ng-template>
+        <!-- Author List view -->
+        <ng-template #authorListView>
+          <ion-list class="bg-transparent">
+            <app-author-list-item *ngFor="let a of displayedAuthors; trackBy: trackById"
+                                  [author]="a">
+            </app-author-list-item>
+          </ion-list>
+        </ng-template>
+      </ng-container>
+    </ng-container>
+    
+    <ng-container *ngIf="libraryType === 'books'">
+      <!-- Loading spinner for books -->
+      <div *ngIf="isLoadingBooks" class="flex items-center justify-center h-full">
+        <ion-spinner name="crescent" color="primary" class="text-4xl"></ion-spinner>
+      </div>
+      
+      <ng-container *ngIf="!isLoadingBooks && (view$ | async) as view">
+        <!-- Book Grid view -->
+        <div *ngIf="view === 'grid'; else bookListView"
+             class="grid grid-cols-3 gap-3 p-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+          <app-book-card *ngFor="let b of displayedBooks; trackBy: trackById"
+                         [book]="b">
+          </app-book-card>
+        </div>
+
+        <!-- Book List view -->
+        <ng-template #bookListView>
+          <ion-list class="bg-transparent">
+            <app-book-library-list-item *ngFor="let b of displayedBooks; trackBy: trackById"
+                                        [book]="b">
+            </app-book-library-list-item>
+          </ion-list>
+        </ng-template>
+      </ng-container>
+    </ng-container>
   </ng-container>
+
+  <ion-infinite-scroll (ionInfinite)="loadData($event)" threshold="200px">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>

@@ -10,17 +10,25 @@ export class AuthorService {
   private readonly authorsSubject = new BehaviorSubject<Author[]>([]);
   readonly authors$ = this.authorsSubject.asObservable();
   private isLoading = false;
+  private hasLoadedInitially = false;
 
   constructor(private http: HttpClient) {
-    // Load authors on service initialization
-    this.loadAuthors().subscribe();
+    // Don't auto-load on service initialization anymore
+    // Let components request when needed
   }
 
   /**
-   * Load authors from the Chaptarr API
+   * Load authors from the Chaptarr API with caching
+   * Only fetches from API if not cached or force refresh is requested
    */
-  loadAuthors(): Observable<Author[]> {
-    if (this.isLoading) {
+  loadAuthors(forceRefresh: boolean = false): Observable<Author[]> {
+    // If we have cached data and not forcing refresh, return cached data
+    if (!forceRefresh && this.hasLoadedInitially && this.authorsSubject.value.length > 0) {
+      return of(this.authorsSubject.value);
+    }
+    
+    // If already loading and not forcing refresh, return the current observable
+    if (this.isLoading && !forceRefresh) {
       return this.authors$;
     }
 
@@ -38,21 +46,37 @@ export class AuthorService {
         // Update the BehaviorSubject with the fetched data
         this.authorsSubject.next(authors);
         this.isLoading = false;
+        this.hasLoadedInitially = true;
       }),
       catchError(error => {
         console.error('Error loading authors:', error);
         this.isLoading = false;
-        // Return empty array on error
+        // Return empty array on error but don't mark as loaded
         return of([]);
       })
     );
   }
 
   /**
-   * Refresh the authors list from the API
+   * Refresh the authors list from the API (forces reload)
    */
   refresh(): Observable<Author[]> {
-    return this.loadAuthors();
+    return this.loadAuthors(true);
+  }
+  
+  /**
+   * Get cached authors synchronously
+   */
+  getCachedAuthors(): Author[] {
+    return this.authorsSubject.value;
+  }
+  
+  /**
+   * Clear the authors cache
+   */
+  clearAuthorsCache(): void {
+    this.authorsSubject.next([]);
+    this.hasLoadedInitially = false;
   }
 
   /**

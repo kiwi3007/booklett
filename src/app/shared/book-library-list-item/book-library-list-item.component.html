@@ -1,0 +1,31 @@
+<ion-item class="bg-transparent cursor-pointer" (click)="openBook()">
+  <ion-avatar slot="start">
+    <img [src]="coverImageUrl" [alt]="book.title" />
+  </ion-avatar>
+  
+  <ion-label>
+    <h2 class="font-medium text-foreground">{{ book.title }}</h2>
+    <p class="text-sm text-muted">{{ authorName }}</p>
+    <p class="text-xs text-muted" *ngIf="releaseYear">{{ releaseYear }}</p>
+  </ion-label>
+
+  <!-- Monitor button -->
+  <ion-button 
+    slot="end" 
+    fill="clear" 
+    (click)="toggleMonitored($event)"
+    [color]="book.monitored ? 'success' : 'medium'"
+  >
+    <ion-icon 
+      slot="icon-only" 
+      [name]="book.monitored ? 'checkmark-circle-outline' : 'ellipse-outline'"
+    ></ion-icon>
+  </ion-button>
+  
+  <!-- Navigate chevron -->
+  <ion-icon 
+    slot="end" 
+    name="chevron-forward-outline" 
+    class="text-muted"
+  ></ion-icon>
+</ion-item>
