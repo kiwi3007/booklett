@@ -67,9 +67,12 @@ export class LibraryPage implements OnDestroy {
   isLoadingBooks = false;
 
   authors$ = combineLatest([this.search$, this.authorSort$, this.order$]).pipe(
-    switchMap(([search, sort, order]) =>
-      this.authorService.query({ search, sort, order })
-    )
+    switchMap(([search, sort, order]) => {
+      // Ensure authors are loaded before querying
+      return this.authorService.loadAuthors().pipe(
+        switchMap(() => this.authorService.query({ search, sort, order }))
+      );
+    })
   );
 
   books$: Observable<Book[]> = combineLatest([this.search$, this.bookSort$, this.order$]).pipe(
