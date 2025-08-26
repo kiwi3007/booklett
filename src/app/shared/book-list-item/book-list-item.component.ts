@@ -4,6 +4,8 @@ import { IonItem, IonLabel, IonThumbnail, IonIcon, IonChip, IonSpinner } from '@
 import { Book } from '../../core/models/book.model';
 import { addIcons } from 'ionicons';
 import { calendarOutline, starOutline, downloadOutline, checkmarkCircleOutline, cloudDownloadOutline } from 'ionicons/icons';
+import { ApiConfigService } from '../../core/services/api-config.service';
+import { getBookCoverUrl } from '../../core/utils/image-url.utils';
 
 @Component({
   selector: 'app-book-list-item',
@@ -16,27 +18,34 @@ export class BookListItemComponent {
   @Input() book!: Book;
   @Input() isDownloading?: boolean = false;
   @Input() downloadProgress?: number;
+  // When true, suppress showing the "Missing" status chip
+  @Input() hideMissing: boolean = false;
+  // When true, display the author's name under the title
+  @Input() showAuthorName: boolean = false;
   @Output() bookClick = new EventEmitter<Book>();
 
-  constructor() {
+  constructor(private apiConfig: ApiConfigService) {
     addIcons({ calendarOutline, starOutline, downloadOutline, checkmarkCircleOutline, cloudDownloadOutline });
   }
 
   get bookImage(): string {
-    // Check for images in the book object or from editions
-    const image = this.book.images?.[0] || this.book.editions?.value?.[0]?.images?.[0];
-    
-    if (image) {
-      // Use remoteUrl if available, otherwise use url
-      return image.remoteUrl || image.url || 'assets/images/book-placeholder.svg';
-    }
-    
-    return 'assets/images/book-placeholder.svg';
+    const serverUrl = this.apiConfig.getBaseUrlSync();
+    return getBookCoverUrl(this.book, serverUrl);
   }
 
   get releaseYear(): string {
     if (!this.book.releaseDate) return '';
     return new Date(this.book.releaseDate).getFullYear().toString();
+  }
+
+  get authorDisplayName(): string | null {
+    const b: any = this.book as any;
+    if (b.authorName) return b.authorName as string;
+    const nameFromAuthor = b.author?.value?.name;
+    if (nameFromAuthor) return nameFromAuthor as string;
+    const nameFromMeta = b.authorMetadata?.value?.name;
+    if (nameFromMeta) return nameFromMeta as string;
+    return null;
   }
 
   get seriesName(): string | null {

@@ -6,6 +6,9 @@
     <h3 class="font-medium text-text">
       {{ book.title }}
     </h3>
+    <p class="text-muted text-sm mt-1" *ngIf="showAuthorName && authorDisplayName">
+      by {{ authorDisplayName }}
+    </p>
     <p class="text-muted text-sm mt-1" *ngIf="seriesName">
       {{ seriesName }}
       <span *ngIf="seriesPosition">#{{ seriesPosition }}</span>
@@ -41,7 +44,7 @@
     </ion-chip>
     
     <!-- Monitored but no file -->
-    <ion-chip *ngIf="!hasFile && !isDownloading && book.monitored" class="h-6 m-0" color="medium">
+    <ion-chip *ngIf="!hideMissing && !hasFile && !isDownloading && book.monitored" class="h-6 m-0" color="medium">
       <ion-icon name="cloud-download-outline" class="text-xs"></ion-icon>
       <span class="text-xs ml-1">Missing</span>
     </ion-chip>

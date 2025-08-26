@@ -3,6 +3,52 @@
     <ion-title>Calendar</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="bg-bg p-4">
-  <div class="text-muted">Upcoming releases and events will appear here.</div>
+
+<ion-content class="bg-bg">
+  <!-- Date range pickers -->
+  <div class="px-4 pt-4 pb-3 flex items-center justify-center gap-3">
+    <ion-datetime-button datetime="startDt"></ion-datetime-button>
+    <span class="text-muted text-sm">to</span>
+    <ion-datetime-button datetime="endDt"></ion-datetime-button>
+
+    <!-- Datetime pickers in modals -->
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime id="startDt" presentation="date" [value]="startIso" [min]="minIso" [max]="maxIso" (ionChange)="onStartDateChange($event)"></ion-datetime>
+      </ng-template>
+    </ion-modal>
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime id="endDt" presentation="date" [value]="endIso" [min]="minIso" [max]="maxIso" (ionChange)="onEndDateChange($event)"></ion-datetime>
+      </ng-template>
+    </ion-modal>
+  </div>
+
+  <!-- Grouped releases -->
+  <div class="px-2 pb-6" *ngIf="groups$ | async as groups">
+    <div *ngIf="groups.length === 0" class="text-center text-muted py-8">
+      No releases in the selected range.
+    </div>
+
+    <div *ngFor="let group of groups" class="mt-4">
+      <div class="px-2 py-1 text-sm font-medium text-muted/90">
+        {{ group.date | date: 'EEEE, MMM d' }}
+      </div>
+      <ion-list class="bg-transparent" *ngIf="queueMap$ | async as qmap">
+        <app-book-list-item
+          *ngFor="let book of group.books"
+          [book]="book"
+          [isDownloading]="qmap[book.id]?.isDownloading"
+          [downloadProgress]="qmap[book.id]?.progress"
+          [hideMissing]="isFuture(book)"
+          [showAuthorName]="true"
+          (bookClick)="openBookDetail($event)">
+        </app-book-list-item>
+      </ion-list>
+    </div>
+  </div>
+
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 </ion-content>

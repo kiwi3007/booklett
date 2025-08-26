@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface BookFile {
@@ -113,6 +113,19 @@ export class BookService {
         bookId: bookId.toString()
       }
     });
+  }
+
+  /**
+   * Get queue details for multiple books in a single request (uses bookIds param).
+   */
+  getQueueDetailsByBookIds(bookIds: number[]): Observable<any[]> {
+    if (!bookIds || bookIds.length === 0) return new Observable<any[]>((sub) => { sub.next([]); sub.complete(); });
+    let params = new HttpParams();
+    // Server accepts repeated bookIds parameters, e.g., ?bookIds=1&bookIds=2
+    for (const id of bookIds) {
+      params = params.append('bookIds', id.toString());
+    }
+    return this.http.get<any[]>(`/api/v1/queue/details`, { params });
   }
 
   /**

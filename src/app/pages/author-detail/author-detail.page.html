@@ -28,11 +28,11 @@
     <ion-card class="bg-card m-4 rounded-xl shadow-sm dark:shadow-none">
       <div class="relative bg-surface rounded-t-xl overflow-hidden" style="height: 16rem;">
         <!-- Blurred background image -->
-        <img [src]="author.imageUrl" 
+        <img [src]="getAuthorImage(author)" 
              [alt]="author.firstName + ' ' + author.lastName"
              class="absolute inset-0 w-full h-full object-cover opacity-30 blur-xl scale-110" />
         <!-- Main image -->
-        <img [src]="author.imageUrl" 
+        <img [src]="getAuthorImage(author)" 
              [alt]="author.firstName + ' ' + author.lastName"
              class="relative w-full h-full object-contain z-10" />
       </div>

@@ -33,7 +33,9 @@ import { arrowDownOutline, arrowUpOutline, eyeOffOutline, eyeOutline, filterOutl
 import { BehaviorSubject, combineLatest, firstValueFrom, map, Observable, switchMap, tap } from 'rxjs';
 import { Author } from '../../core/models/author.model';
 import { Book } from '../../core/models/book.model';
+import { ApiConfigService } from '../../core/services/api-config.service';
 import { AuthorService } from '../../core/services/author.service';
+import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
 import { BookDetailModalComponent } from '../../modals/book-detail-modal/book-detail-modal.component';
 import { BookListItemComponent } from '../../shared/book-list-item/book-list-item.component';
 
@@ -89,7 +91,8 @@ export class AuthorDetailPage implements OnInit {
     private authorService: AuthorService,
     private actionSheetController: ActionSheetController,
     private sanitizer: DomSanitizer,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private apiConfig: ApiConfigService
   ) {
     addIcons({
       eyeOutline,
@@ -356,6 +359,11 @@ export class AuthorDetailPage implements OnInit {
     return queueItem?.sizeleft && queueItem?.size
       ? Math.round((1 - queueItem.sizeleft / queueItem.size) * 100)
       : undefined;
+  }
+
+  getAuthorImage(author: Author): string {
+    const serverUrl = this.apiConfig.getBaseUrlSync();
+    return getAuthorImageUrl(author, serverUrl);
   }
 
   async openBookDetail(book: Book) {

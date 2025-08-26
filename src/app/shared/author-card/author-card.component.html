@@ -1,6 +1,6 @@
 <ion-card [routerLink]="['/author', author.id]" class="overflow-hidden rounded-xl bg-card shadow-sm dark:shadow-none cursor-pointer">
   <div class="relative aspect-[3/4] bg-surface">
-    <img [src]="author.imageUrl"
+    <img [src]="authorImage"
          [alt]="author.firstName + ' ' + author.lastName"
          loading="lazy"
          class="h-full w-full object-cover" />

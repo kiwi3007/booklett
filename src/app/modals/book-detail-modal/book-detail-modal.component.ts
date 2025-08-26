@@ -17,6 +17,8 @@ import {
   timeOutline
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
+import { ApiConfigService } from '../../core/services/api-config.service';
+import { getBookCoverUrl } from '../../core/utils/image-url.utils';
 import { BookFile, BookHistory, BookService } from '../../core/services/book.service';
 
 @Component({
@@ -42,7 +44,8 @@ export class BookDetailModalComponent implements OnInit {
   constructor(
     private modalController: ModalController,
     private bookService: BookService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private apiConfig: ApiConfigService
   ) {
     // Register all required icons
     addIcons({
@@ -161,13 +164,8 @@ export class BookDetailModalComponent implements OnInit {
   }
 
   getBookCover(): string {
-    if (this.book.images && this.book.images.length > 0) {
-      const cover = this.book.images.find((img: any) => img.coverType === 'cover');
-      if (cover) {
-        return cover.url;
-      }
-    }
-    return 'assets/no-cover.svg';
+    const serverUrl = this.apiConfig.getBaseUrlSync();
+    return getBookCoverUrl(this.book, serverUrl);
   }
 
   formatDuration(minutes: number): string {
