@@ -42,7 +42,9 @@
   <!-- Version Info -->
   <div class="text-center text-muted text-xs mt-8 px-4">
     <p>Booklett v{{ appVersion }}</p>
-    <p *ngIf="buildDate">Built: {{ buildDate | date:'short' }}</p>
+    @if (buildDate) {
+      <p>Built: {{ buildDate | date:'short' }}</p>
+    }
     <ion-button size="small" fill="clear" (click)="checkForUpdates()">
       Check for Updates
     </ion-button>
