@@ -2,19 +2,21 @@
   <ion-toolbar>
     <ion-title>Server Settings</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">Close</ion-button>
+      <ion-button (click)="dismiss()" [disabled]="firstRun || isVerifying">Close</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <!-- Show error message if connection failed -->
-  <ion-alert *ngIf="errorMessage" class="ion-margin-bottom">
-    <div class="error-alert">
-      <ion-icon name="warning-outline" color="danger"></ion-icon>
-      <p>{{ errorMessage }}</p>
-    </div>
-  </ion-alert>
+  <ion-card *ngIf="verificationError" color="danger" class="ion-margin-bottom">
+    <ion-card-content class="ion-no-padding">
+      <ion-item lines="none" color="danger">
+        <ion-icon name="warning-outline" slot="start"></ion-icon>
+        <ion-label class="ion-text-wrap">{{ verificationError }}</ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
 
   <form [formGroup]="form" (ngSubmit)="save()">
     <ion-list inset>
@@ -26,7 +28,10 @@
           formControlName="url"
           inputmode="url"
           required
-          autocomplete="off">
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="done">
         </ion-input>
       </ion-item>
       <ion-item>
@@ -35,14 +40,26 @@
           label-placement="stacked"
           formControlName="apiKey"
           autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
           required
-          type="password">
+          type="password"
+          enterkeyhint="done">
         </ion-input>
       </ion-item>
     </ion-list>
 
     <div class="ion-padding-top">
-      <ion-button expand="block" type="submit">Save</ion-button>
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="isVerifying || !form.valid">
+        <ion-spinner *ngIf="isVerifying" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="isSuccess" name="checkmark-circle" slot="start"></ion-icon>
+        <span *ngIf="!isVerifying && !isSuccess">Test and Save</span>
+        <span *ngIf="isVerifying">Testing Connection...</span>
+        <span *ngIf="isSuccess">Connected!</span>
+      </ion-button>
     </div>
   </form>
 </ion-content>

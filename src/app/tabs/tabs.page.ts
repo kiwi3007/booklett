@@ -35,14 +35,20 @@ export class TabsPage implements OnInit {
   }
 
   private async showServerSettingsModal(errorMessage?: string) {
+    // Use a reference object to track if the modal can be dismissed
+    const allowCloseRef = { value: false };
+
     const modal = await this.modalCtrl.create({
       component: ServerSettingsPage,
       componentProps: {
-        errorMessage
+        errorMessage,
+        // Callback to unlock the modal for dismissal
+        onAllowClose: () => { allowCloseRef.value = true; }
       },
       breakpoints: [0, 1],
       initialBreakpoint: 1,
-      canDismiss: false,
+      // Use a function that checks the reference value and returns a Promise
+      canDismiss: async () => allowCloseRef.value,
       backdropDismiss: false,
       cssClass: 'server-settings-modal'
     });

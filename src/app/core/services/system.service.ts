@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -49,24 +49,55 @@ export class SystemService {
   /**
    * Check the system status to verify server connection
    */
-  checkStatus(): Observable<ConnectionStatus> {
+  checkStatus(options?: { preferStatusText?: boolean }): Observable<ConnectionStatus> {
     return this.http.get<SystemStatus>('/api/v1/system/status').pipe(
       map(status => ({
         isConnected: true,
         systemInfo: status
       })),
-      catchError(error => {
+      catchError((error: HttpErrorResponse) => {
         console.error('Failed to connect to Chaptarr server:', error);
-        let errorMessage = 'Unable to connect to server';
         
-        if (error.status === 401) {
-          errorMessage = 'Invalid API key';
-        } else if (error.status === 0) {
-          errorMessage = 'Server is unreachable. Please check your server URL.';
-        } else if (error.status === 404) {
-          errorMessage = 'Invalid server URL or API endpoint not found';
-        } else if (error.message) {
-          errorMessage = error.message;
+        let errorMessage: string;
+        
+        if (options?.preferStatusText) {
+          // Use the HTTP status text for more specific error messages
+          // Try multiple sources for the error message
+          if (error?.statusText && error.statusText !== 'OK' && error.statusText !== 'Unknown Error') {
+            errorMessage = error.statusText;
+          } else if (error?.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error?.message) {
+            errorMessage = error.message;
+          } else {
+            // Fallback to status code descriptions
+            switch (error.status) {
+              case 401:
+                errorMessage = 'Unauthorized - Invalid API Key';
+                break;
+              case 404:
+                errorMessage = 'Not Found - Invalid Server URL';
+                break;
+              case 0:
+                errorMessage = 'Server Unreachable';
+                break;
+              default:
+                errorMessage = `HTTP Error ${error.status}`;
+            }
+          }
+        } else {
+          // Use the existing user-friendly messages
+          errorMessage = 'Unable to connect to server';
+          
+          if (error.status === 401) {
+            errorMessage = 'Invalid API key';
+          } else if (error.status === 0) {
+            errorMessage = 'Server is unreachable. Please check your server URL.';
+          } else if (error.status === 404) {
+            errorMessage = 'Invalid server URL or API endpoint not found';
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
         }
         
         return of({
