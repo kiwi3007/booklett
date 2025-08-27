@@ -5,6 +5,8 @@ import { bookOutline, calendarOutline, listOutline, settingsOutline } from 'ioni
 import { ServerSettingsService } from '../core/services/server-settings.service';
 import { SystemService } from '../core/services/system.service';
 import { ServerSettingsPage } from '../pages/server-settings/server-settings.page';
+import { AuthorService } from '../core/services/author.service';
+import { BookService } from '../core/services/book.service';
 
 @Component({
   selector: 'app-tabs',
@@ -19,6 +21,8 @@ export class TabsPage implements OnInit {
   private system = inject(SystemService);
   private toastCtrl = inject(ToastController);
   private loadingCtrl = inject(LoadingController);
+  private authorService = inject(AuthorService);
+  private bookService = inject(BookService);
 
   constructor() {
     addIcons({ bookOutline, calendarOutline, listOutline, settingsOutline });
@@ -82,6 +86,12 @@ export class TabsPage implements OnInit {
           color: 'success'
         });
         await toast.present();
+        
+        // Trigger a refresh of authors and books after successful authentication
+        // This ensures data loads properly after the user authenticates
+        this.authorService.refresh().subscribe();
+        this.bookService.refreshBooks('audiobook').subscribe();
+        this.bookService.refreshBooks('ebook').subscribe();
       } else {
         // Connection failed, show error and open settings
         const toast = await this.toastCtrl.create({

@@ -51,7 +51,9 @@ export class AuthorService {
       catchError(error => {
         console.error('Error loading authors:', error);
         this.isLoading = false;
-        // Return empty array on error but don't mark as loaded
+        // Don't mark as loaded on error so it will retry
+        this.hasLoadedInitially = false;
+        // Return empty array on error
         return of([]);
       })
     );

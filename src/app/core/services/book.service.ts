@@ -121,7 +121,8 @@ export class BookService {
         } else {
           this.isLoadingEbooks = false;
         }
-        // Return empty array on error but don't cache it
+        // Don't cache the error state - this allows retry after authentication
+        // Return empty array on error
         return of([]);
       })
     );
