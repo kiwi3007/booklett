@@ -54,5 +54,8 @@ export function suppressBrowserExtensionErrors() {
       event.preventDefault();
       return false;
     }
+    
+    // Let other errors through
+    return true;
   });
 }
