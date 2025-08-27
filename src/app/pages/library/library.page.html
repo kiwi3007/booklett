@@ -87,7 +87,7 @@
       <ng-container *ngIf="!isLoadingBooks && (view$ | async) as view">
         <!-- Book Grid view -->
         <div *ngIf="view === 'grid'; else bookListView"
-             class="grid grid-cols-3 gap-3 p-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+             class="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4">
           <app-book-card *ngFor="let b of displayedBooks; trackBy: trackById"
                          [book]="b">
           </app-book-card>
