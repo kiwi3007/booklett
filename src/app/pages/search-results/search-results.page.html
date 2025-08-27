@@ -66,7 +66,9 @@
         <!-- Book result -->
         <app-book-library-list-item 
           *ngIf="result.resultType === 'book' && transformToBook(result) as book"
-          [book]="book">
+          [book]="book"
+          [disableNavigation]="true"
+          (bookClick)="onBookClick(result)">
         </app-book-library-list-item>
 
         <!-- Series result -->

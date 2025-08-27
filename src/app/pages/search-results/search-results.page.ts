@@ -15,6 +15,7 @@ import { BookLibraryListItemComponent } from '../../shared/book-library-list-ite
 import { addIcons } from 'ionicons';
 import { searchOutline, bookOutline, peopleOutline, albumsOutline } from 'ionicons/icons';
 import { AuthorAddModalComponent } from '../../modals/author-add-modal/author-add-modal.component';
+import { BookAddModalComponent } from '../../modals/book-add-modal/book-add-modal.component';
 import { AuthorService } from '../../core/services/author.service';
 
 @Component({
@@ -244,6 +245,39 @@ export class SearchResultsPage implements OnInit, OnDestroy {
       // If author was added successfully, we could refresh the search or navigate
       // For now, just log the success
       console.log('Author add modal closed with data:', data);
+    }
+  }
+
+  async onBookClick(result: SearchResult) {
+    const book = result.book;
+    if (book) {
+      // Always open the add modal from search results
+      // No navigation should happen from the search view
+      await this.openBookAddModal(result);
+    }
+  }
+
+  async openBookAddModal(result: SearchResult) {
+    // Pass the transformed book which includes remoteCover
+    const transformedBook = this.transformToBook(result);
+    const modal = await this.modalController.create({
+      component: BookAddModalComponent,
+      componentProps: {
+        book: { ...result.book, remoteCover: transformedBook.remoteCover },
+        author: result.book?.author
+      },
+      breakpoints: [0, 0.5, 0.75, 0.9, 1],
+      initialBreakpoint: 0.9,
+      expandToScroll: false
+    });
+
+    await modal.present();
+    
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      // If book was added successfully, we could refresh the search or navigate
+      // For now, just log the success
+      console.log('Book add modal closed with data:', data);
     }
   }
 

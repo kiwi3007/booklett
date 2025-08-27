@@ -28,16 +28,15 @@ import {
   ToastController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline, saveOutline, folderOutline, bookOutline, eyeOutline, addCircleOutline, searchOutline, optionsOutline, informationCircleOutline } from 'ionicons/icons';
+import { closeOutline, folderOutline, bookOutline, eyeOutline, addCircleOutline, searchOutline, optionsOutline, informationCircleOutline, personOutline } from 'ionicons/icons';
 import { AuthorService } from '../../core/services/author.service';
-import { Author } from '../../core/models/author.model';
 import { ApiConfigService } from '../../core/services/api-config.service';
-import { getAuthorImageUrl, resolveImageUrl } from '../../core/utils/image-url.utils';
+import { getBookCoverUrl, resolveImageUrl } from '../../core/utils/image-url.utils';
 
 @Component({
-  selector: 'app-author-add-modal',
-  templateUrl: './author-add-modal.component.html',
-  styleUrls: ['./author-add-modal.component.scss'],
+  selector: 'app-book-add-modal',
+  templateUrl: './book-add-modal.component.html',
+  styleUrls: ['./book-add-modal.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -65,8 +64,9 @@ import { getAuthorImageUrl, resolveImageUrl } from '../../core/utils/image-url.u
     IonSegmentButton
   ]
 })
-export class AuthorAddModalComponent implements OnInit {
-  @Input() author: any; // Author data from search results
+export class BookAddModalComponent implements OnInit {
+  @Input() book: any; // Book data from search results
+  @Input() author: any; // Author data if available
 
   qualityProfiles: any[] = [];
   metadataProfiles: any[] = [];
@@ -77,12 +77,14 @@ export class AuthorAddModalComponent implements OnInit {
   selectedQualityProfile: number | null = null;
   selectedMetadataProfile: number | null = null;
   selectedRootFolder: string = '';
-  monitorNewBooks: boolean = true;  // Default to true
-  searchForMissingBooks: boolean = false;
+  monitorAuthor: boolean = true;  // Default to true - Monitor other books by author
+  monitorNewBooks: boolean = true;  // Default to true - Monitor new books by author
+  searchNow: boolean = false;  // Search for this book now
   
   loading: boolean = true;
   profilesLoading: boolean = false;
   saving: boolean = false;
+  descriptionExpanded: boolean = false; // Track description expansion state
 
   constructor(
     private modalController: ModalController,
@@ -93,14 +95,14 @@ export class AuthorAddModalComponent implements OnInit {
   ) {
     addIcons({ 
       closeOutline, 
-      saveOutline, 
       folderOutline, 
       bookOutline, 
       eyeOutline, 
       addCircleOutline, 
       searchOutline, 
       optionsOutline, 
-      informationCircleOutline 
+      informationCircleOutline,
+      personOutline 
     });
   }
 
@@ -192,42 +194,44 @@ export class AuthorAddModalComponent implements OnInit {
     }
 
     // For now, just close the modal as requested
-    // In a real implementation, this would call the API to add the author
+    // In a real implementation, this would call the API to add the book
     await this.dismiss(true);
     
     /* Future implementation:
     this.saving = true;
     
-    const authorData = {
-      ...this.author,
+    const bookData = {
+      ...this.book,
       mediaType: this.mediaType,
       qualityProfileId: this.selectedQualityProfile,
       metadataProfileId: this.selectedMetadataProfile,
       rootFolderPath: this.selectedRootFolder,
-      monitored: true,  // Always monitor the author (that's the purpose of this modal)
-      monitorNewItems: this.monitorNewBooks,
-      searchForMissingBooks: this.searchForMissingBooks,
+      monitored: true,  // Always monitor the book (that's the purpose of this modal)
+      monitorAuthor: this.monitorAuthor,
+      monitorNewBooks: this.monitorNewBooks,
+      searchNow: this.searchNow,
       addOptions: {
-        monitor: this.monitorNewBooks ? 'all' : 'none',
-        searchForMissingBooks: this.searchForMissingBooks
+        searchForBook: this.searchNow,
+        monitorAuthor: this.monitorAuthor,
+        monitor: this.monitorNewBooks ? 'future' : 'none'
       }
     };
 
     try {
       const loading = await this.loadingController.create({
-        message: 'Adding author to library...',
+        message: 'Adding book to library...',
         spinner: 'circular'
       });
       await loading.present();
 
-      await this.authorService.addAuthor(authorData).toPromise();
+      // API call would go here
       
       await loading.dismiss();
-      await this.showToast('Author added successfully', 'success');
+      await this.showToast('Book added successfully', 'success');
       await this.dismiss(true);
     } catch (error) {
-      console.error('Error adding author:', error);
-      await this.showToast('Error adding author to library', 'danger');
+      console.error('Error adding book:', error);
+      await this.showToast('Error adding book to library', 'danger');
     } finally {
       this.saving = false;
     }
@@ -248,30 +252,55 @@ export class AuthorAddModalComponent implements OnInit {
     await toast.present();
   }
 
-  getAuthorDisplayName(): string {
-    if (!this.author) return 'Unknown Author';
-    
-    if (this.author.authorName) {
+  getBookTitle(): string {
+    return this.book?.title || this.book?.titleSlug || 'Unknown Book';
+  }
+
+  getAuthorName(): string {
+    if (this.author?.authorName) {
       return this.author.authorName;
     }
     
-    const firstName = this.author.authorNameFirstLast || this.author.firstName || '';
-    const lastName = this.author.authorNameLastFirst?.split(',')[0] || this.author.lastName || '';
+    if (this.book?.author?.authorName) {
+      return this.book.author.authorName;
+    }
     
-    return `${firstName} ${lastName}`.trim() || 'Unknown Author';
+    if (this.book?.author?.authorNameLastFirst) {
+      // Convert "Last, First" to "First Last"
+      const parts = this.book.author.authorNameLastFirst.split(',');
+      if (parts.length === 2) {
+        return `${parts[1].trim()} ${parts[0].trim()}`;
+      }
+      return this.book.author.authorNameLastFirst;
+    }
+    
+    return 'Unknown Author';
   }
 
-  getAuthorImage(): string {
+  getBookImage(): string {
     const serverUrl = this.apiConfig.getBaseUrlSync();
     
-    // First check if author has remotePoster property (from search results)
-    if (this.author?.remotePoster) {
-      // Remote poster might be a relative path, so we need to resolve it
-      return resolveImageUrl(this.author.remotePoster, serverUrl);
+    // First check if book has remoteCover property (from search results)
+    if (this.book?.remoteCover) {
+      // Remote cover might be a relative path, so we need to resolve it
+      return resolveImageUrl(this.book.remoteCover, serverUrl);
     }
     
     // Otherwise use the standard image resolution
-    return getAuthorImageUrl(this.author, serverUrl);
+    return getBookCoverUrl(this.book, serverUrl);
+  }
+
+  getBookDescription(): string | null {
+    return this.book?.overview || this.book?.description || null;
+  }
+
+  shouldShowReadMore(): boolean {
+    const description = this.getBookDescription();
+    return !!description && description.length > 300;
+  }
+
+  toggleDescription() {
+    this.descriptionExpanded = !this.descriptionExpanded;
   }
 
   async onMediaTypeChange(event: any) {

@@ -26,6 +26,7 @@ import { ServerSettingsService } from '../../core/services/server-settings.servi
 })
 export class BookLibraryListItemComponent {
   @Input() book!: Book;
+  @Input() disableNavigation: boolean = false;
   @Output() bookClick = new EventEmitter<Book>();
 
   private serverBaseUrl: string | null = null;
@@ -96,6 +97,16 @@ export class BookLibraryListItemComponent {
       return new Date(this.book.releaseDate).getFullYear().toString();
     }
     return '';
+  }
+
+  async handleClick() {
+    if (this.disableNavigation) {
+      // Emit event instead of navigating
+      this.bookClick.emit(this.book);
+    } else {
+      // Default behavior - open book detail modal
+      await this.openBook();
+    }
   }
 
   async openBook() {
