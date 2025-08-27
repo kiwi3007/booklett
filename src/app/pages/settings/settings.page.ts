@@ -1,25 +1,30 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonSegment, IonSegmentButton, IonTitle, IonToolbar, LoadingController, ModalController, ToastController } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonSegment, IonSegmentButton, IonTitle, IonToolbar, IonButton, LoadingController, ModalController, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronForwardOutline } from 'ionicons/icons';
 import { SystemService } from '../../core/services/system.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { ServerSettingsPage } from '../server-settings/server-settings.page';
+import { PwaUpdateService } from '../../core/services/pwa-update.service';
+import { APP_VERSION, BUILD_DATE } from '../../version';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonSegment, IonSegmentButton, AsyncPipe],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonSegment, IonSegmentButton, IonButton, AsyncPipe, DatePipe],
 })
 export class SettingsPage {
   private modalCtrl = inject(ModalController);
   private system = inject(SystemService);
   private toastCtrl = inject(ToastController);
   private loadingCtrl = inject(LoadingController);
+  private pwaUpdateService = inject(PwaUpdateService);
 
   themeMode$ = this.theme.mode$;
+  appVersion = APP_VERSION;
+  buildDate = BUILD_DATE;
 
   constructor(private theme: ThemeService) {
     addIcons({ chevronForwardOutline });
@@ -84,5 +89,16 @@ export class SettingsPage {
       });
       await toast.present();
     });
+  }
+  
+  async checkForUpdates() {
+    const toast = await this.toastCtrl.create({
+      message: 'Checking for updates...',
+      duration: 2000,
+      position: 'bottom'
+    });
+    await toast.present();
+    
+    await this.pwaUpdateService.checkForUpdates();
   }
 }
