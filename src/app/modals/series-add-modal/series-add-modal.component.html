@@ -1,0 +1,180 @@
+<ion-header [translucent]="true" class="modal-header">
+  <ion-toolbar class="modal-toolbar">
+    <ion-title>Monitor New Series</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss(false)" class="close-button">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Series header with icon -->
+  <div class="series-header">
+    <div class="series-icon-container">
+      <div class="series-icon-wrapper">
+        <ion-icon name="albums-outline" class="series-icon"></ion-icon>
+      </div>
+    </div>
+    
+    <!-- Series info -->
+    <div class="series-info">
+      <h2 class="series-title">{{ getSeriesTitle() }}</h2>
+      <p class="series-author" *ngIf="getAuthorName()">by {{ getAuthorName() }}</p>
+      <div class="series-stats">
+        <ion-badge color="primary">
+          <ion-icon name="book-outline"></ion-icon>
+          {{ getBookCount() }} books
+        </ion-badge>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Series description -->
+  <ion-card class="description-card" *ngIf="getSeriesDescription()">
+    <ion-card-content>
+      <p class="description-text">
+        <span *ngIf="!descriptionExpanded">{{ getSeriesDescription() | slice:0:300 }}</span>
+        <span *ngIf="!descriptionExpanded && shouldShowReadMore()">...</span>
+        <span *ngIf="descriptionExpanded">{{ getSeriesDescription() }}</span>
+      </p>
+      <ion-button 
+        *ngIf="shouldShowReadMore()" 
+        fill="clear" 
+        size="small" 
+        (click)="toggleDescription()"
+        class="read-more-button">
+        <ion-text color="primary">
+          {{ descriptionExpanded ? 'Show less' : 'Read more' }}
+        </ion-text>
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="circular" color="primary"></ion-spinner>
+    <ion-text color="medium">
+      <p>Loading configuration options...</p>
+    </ion-text>
+  </div>
+
+  <!-- Configuration Options -->
+  <div class="configuration-section" *ngIf="!loading">
+    <!-- Configuration Card -->
+    <ion-card class="config-card">
+      <ion-card-header>
+        <ion-card-title>Configuration</ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="config-content">
+        <!-- Media Type Selector -->
+        <div class="media-type-selector">
+          <ion-segment [value]="mediaType" (ionChange)="onMediaTypeChange($event)" class="media-segment">
+            <ion-segment-button value="audiobook" [disabled]="isMediaTypeDisabled('audiobook')">
+              <ion-label>Audiobooks</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="ebook" [disabled]="isMediaTypeDisabled('ebook')">
+              <ion-label>eBooks</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+
+        <ion-list lines="none">
+          <!-- Root Folder -->
+          <ion-item class="config-item" [class.loading]="profilesLoading">
+            <ion-icon name="folder-outline" slot="start" class="config-icon"></ion-icon>
+            <ion-label>
+              <h3>Root Folder</h3>
+              <p>Where to store series files</p>
+            </ion-label>
+            <ion-select [(ngModel)]="selectedRootFolder" placeholder="Select folder" interface="action-sheet" [disabled]="profilesLoading">
+              <ion-select-option *ngFor="let folder of getCurrentRootFolders()" [value]="folder">
+                {{ folder }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Quality Profile -->
+          <ion-item class="config-item" [class.loading]="profilesLoading">
+            <ion-icon name="options-outline" slot="start" class="config-icon"></ion-icon>
+            <ion-label>
+              <h3>Quality Profile</h3>
+              <p>{{ mediaType === 'audiobook' ? 'Audio' : 'File' }} quality preferences</p>
+            </ion-label>
+            <ion-select [(ngModel)]="selectedQualityProfile" placeholder="Select profile" interface="action-sheet" [disabled]="profilesLoading">
+              <ion-select-option *ngFor="let profile of qualityProfiles" [value]="profile.id">
+                {{ profile.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Metadata Profile -->
+          <ion-item class="config-item" [class.loading]="profilesLoading">
+            <ion-icon name="information-circle-outline" slot="start" class="config-icon"></ion-icon>
+            <ion-label>
+              <h3>Metadata Profile</h3>
+              <p>Series information settings</p>
+            </ion-label>
+            <ion-select [(ngModel)]="selectedMetadataProfile" placeholder="Select profile" interface="action-sheet" [disabled]="profilesLoading">
+              <ion-select-option *ngFor="let profile of metadataProfiles" [value]="profile.id">
+                {{ profile.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Monitor Options Card -->
+    <ion-card class="monitor-card">
+      <ion-card-header>
+        <ion-card-title>Monitor Options</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <!-- Monitor Existing Books -->
+          <ion-item class="toggle-item">
+            <ion-icon name="book-outline" slot="start" class="toggle-icon"></ion-icon>
+            <ion-label>
+              <h3>Monitor Existing Books</h3>
+              <p>Monitor books already in this series</p>
+            </ion-label>
+            <ion-toggle slot="end" [(ngModel)]="monitorExistingBooks" color="primary"></ion-toggle>
+          </ion-item>
+
+          <!-- Monitor New Books -->
+          <ion-item class="toggle-item">
+            <ion-icon name="add-circle-outline" slot="start" class="toggle-icon"></ion-icon>
+            <ion-label>
+              <h3>Monitor New Books</h3>
+              <p>Monitor future books in this series</p>
+            </ion-label>
+            <ion-toggle slot="end" [(ngModel)]="monitorNewBooks" color="primary"></ion-toggle>
+          </ion-item>
+
+          <!-- Search for Missing Books -->
+          <ion-item class="toggle-item">
+            <ion-icon name="search-outline" slot="start" class="toggle-icon"></ion-icon>
+            <ion-label>
+              <h3>Search for Missing</h3>
+              <p>Search for missing books in this series</p>
+            </ion-label>
+            <ion-toggle slot="end" [(ngModel)]="searchForMissingBooks" color="primary"></ion-toggle>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons" *ngIf="!loading">
+    <ion-button expand="block" (click)="save()" [disabled]="saving" class="primary-button">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      {{ saving ? 'Adding...' : 'Add to Library' }}
+    </ion-button>
+    <ion-button expand="block" fill="clear" (click)="dismiss(false)" [disabled]="saving" class="cancel-button">
+      Cancel
+    </ion-button>
+  </div>
+</ion-content>

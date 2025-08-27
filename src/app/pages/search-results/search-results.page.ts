@@ -16,6 +16,7 @@ import { addIcons } from 'ionicons';
 import { searchOutline, bookOutline, peopleOutline, albumsOutline } from 'ionicons/icons';
 import { AuthorAddModalComponent } from '../../modals/author-add-modal/author-add-modal.component';
 import { BookAddModalComponent } from '../../modals/book-add-modal/book-add-modal.component';
+import { SeriesAddModalComponent } from '../../modals/series-add-modal/series-add-modal.component';
 import { AuthorService } from '../../core/services/author.service';
 
 @Component({
@@ -282,12 +283,34 @@ export class SearchResultsPage implements OnInit, OnDestroy {
   }
 
 
-  onSeriesClick(result: SearchResult) {
+  async onSeriesClick(result: SearchResult) {
     const series = result.series;
     if (series) {
-      // For now, just navigate to the first book's author if available
-      // In the future, this could navigate to a series detail page
-      console.log('Series clicked:', series);
+      // Always open the add modal from search results
+      // No navigation should happen from the search view
+      await this.openSeriesAddModal(result);
+    }
+  }
+
+  async openSeriesAddModal(result: SearchResult) {
+    const modal = await this.modalController.create({
+      component: SeriesAddModalComponent,
+      componentProps: {
+        series: result.series,
+        author: result.series?.author
+      },
+      breakpoints: [0, 0.5, 0.75, 0.9, 1],
+      initialBreakpoint: 0.9,
+      expandToScroll: false
+    });
+
+    await modal.present();
+    
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      // If series was added successfully, we could refresh the search or navigate
+      // For now, just log the success
+      console.log('Series add modal closed with data:', data);
     }
   }
 
