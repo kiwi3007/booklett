@@ -1,10 +1,10 @@
 import { Component, EnvironmentInjector, inject, OnInit } from '@angular/core';
-import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, ModalController, ToastController, LoadingController } from '@ionic/angular/standalone';
+import { IonIcon, IonLabel, IonTabBar, IonTabButton, IonTabs, LoadingController, ModalController, ToastController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { bookOutline, calendarOutline, listOutline, settingsOutline } from 'ionicons/icons';
 import { ServerSettingsService } from '../core/services/server-settings.service';
-import { ServerSettingsPage } from '../pages/server-settings/server-settings.page';
 import { SystemService } from '../core/services/system.service';
+import { ServerSettingsPage } from '../pages/server-settings/server-settings.page';
 
 @Component({
   selector: 'app-tabs',
@@ -40,16 +40,15 @@ export class TabsPage implements OnInit {
       componentProps: {
         errorMessage
       },
-      breakpoints: [0, 0.5, 0.75, 1],
-      initialBreakpoint: 0.5,
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
       canDismiss: false,
       backdropDismiss: false,
-      handleBehavior: 'cycle',
       cssClass: 'server-settings-modal'
     });
-    
+
     await modal.present();
-    
+
     const { data } = await modal.onWillDismiss();
     if (data?.saved) {
       // After saving settings, check the connection
@@ -62,12 +61,12 @@ export class TabsPage implements OnInit {
       message: 'Connecting to Chaptarr server...',
       spinner: 'crescent'
     });
-    
+
     await loading.present();
-    
+
     this.system.checkStatus().subscribe(async (status) => {
       await loading.dismiss();
-      
+
       if (status.isConnected) {
         // Connection successful
         const toast = await this.toastCtrl.create({
@@ -94,7 +93,7 @@ export class TabsPage implements OnInit {
           ]
         });
         await toast.present();
-        
+
         // Also show the settings modal automatically
         setTimeout(() => {
           this.showServerSettingsModal(status.error);
