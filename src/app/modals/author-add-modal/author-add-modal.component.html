@@ -1,0 +1,154 @@
+<ion-header [translucent]="true" class="modal-header">
+  <ion-toolbar class="modal-toolbar">
+    <ion-title>Monitor New Author</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss(false)" class="close-button">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Author header with image -->
+  <div class="author-header">
+    <div class="author-image-container">
+      <!-- Blurred background image -->
+      <img [src]="getAuthorImage()" 
+           [alt]="getAuthorDisplayName()"
+           class="author-image-blur" />
+      <!-- Main image -->
+      <img [src]="getAuthorImage()" 
+           [alt]="getAuthorDisplayName()"
+           class="author-image-main" />
+    </div>
+    
+    <!-- Author info overlay -->
+    <div class="author-info-overlay">
+      <h2 class="author-name">{{ getAuthorDisplayName() }}</h2>
+    </div>
+  </div>
+  
+  <!-- Author overview -->
+  <ion-card class="overview-card" *ngIf="author?.overview">
+    <ion-card-content>
+      <p class="overview-text">{{ author.overview | slice:0:300 }}{{ author.overview.length > 300 ? '...' : '' }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="circular" color="primary"></ion-spinner>
+    <ion-text color="medium">
+      <p>Loading configuration options...</p>
+    </ion-text>
+  </div>
+
+  <!-- Configuration Options -->
+  <div class="configuration-section" *ngIf="!loading">
+    <!-- Configuration Card -->
+    <ion-card class="config-card">
+      <ion-card-header>
+        <ion-card-title>Configuration</ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="config-content">
+        <!-- Media Type Selector -->
+        <div class="media-type-selector">
+          <ion-segment [value]="mediaType" (ionChange)="onMediaTypeChange($event)" class="media-segment">
+            <ion-segment-button value="audiobook" [disabled]="isMediaTypeDisabled('audiobook')">
+              <ion-label>Audiobooks</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="ebook" [disabled]="isMediaTypeDisabled('ebook')">
+              <ion-label>eBooks</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </div>
+
+        <ion-list lines="none">
+          <!-- Root Folder -->
+          <ion-item class="config-item" [class.loading]="profilesLoading">
+            <ion-icon name="folder-outline" slot="start" class="config-icon"></ion-icon>
+            <ion-label>
+              <h3>Root Folder</h3>
+              <p>Where to store author files</p>
+            </ion-label>
+            <ion-select [(ngModel)]="selectedRootFolder" placeholder="Select folder" interface="action-sheet" [disabled]="profilesLoading">
+              <ion-select-option *ngFor="let folder of getCurrentRootFolders()" [value]="folder">
+                {{ folder }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Quality Profile -->
+          <ion-item class="config-item" [class.loading]="profilesLoading">
+            <ion-icon name="options-outline" slot="start" class="config-icon"></ion-icon>
+            <ion-label>
+              <h3>Quality Profile</h3>
+              <p>{{ mediaType === 'audiobook' ? 'Audio' : 'File' }} quality preferences</p>
+            </ion-label>
+            <ion-select [(ngModel)]="selectedQualityProfile" placeholder="Select profile" interface="action-sheet" [disabled]="profilesLoading">
+              <ion-select-option *ngFor="let profile of qualityProfiles" [value]="profile.id">
+                {{ profile.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <!-- Metadata Profile -->
+          <ion-item class="config-item" [class.loading]="profilesLoading">
+            <ion-icon name="information-circle-outline" slot="start" class="config-icon"></ion-icon>
+            <ion-label>
+              <h3>Metadata Profile</h3>
+              <p>Book information settings</p>
+            </ion-label>
+            <ion-select [(ngModel)]="selectedMetadataProfile" placeholder="Select profile" interface="action-sheet" [disabled]="profilesLoading">
+              <ion-select-option *ngFor="let profile of metadataProfiles" [value]="profile.id">
+                {{ profile.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Monitor Options Card -->
+    <ion-card class="monitor-card">
+      <ion-card-header>
+        <ion-card-title>Monitor Options</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <!-- Monitor New Books -->
+          <ion-item class="toggle-item">
+            <ion-icon name="add-circle-outline" slot="start" class="toggle-icon"></ion-icon>
+            <ion-label>
+              <h3>Monitor New Books</h3>
+              <p>Automatically monitor future books</p>
+            </ion-label>
+            <ion-toggle slot="end" [(ngModel)]="monitorNewBooks" color="primary"></ion-toggle>
+          </ion-item>
+
+          <!-- Search for Missing Books -->
+          <ion-item class="toggle-item">
+            <ion-icon name="search-outline" slot="start" class="toggle-icon"></ion-icon>
+            <ion-label>
+              <h3>Search for Missing</h3>
+              <p>Search for books after adding author</p>
+            </ion-label>
+            <ion-toggle slot="end" [(ngModel)]="searchForMissingBooks" color="primary"></ion-toggle>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons" *ngIf="!loading">
+    <ion-button expand="block" (click)="save()" [disabled]="saving" class="primary-button">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      {{ saving ? 'Adding...' : 'Add to Library' }}
+    </ion-button>
+    <ion-button expand="block" fill="clear" (click)="dismiss(false)" [disabled]="saving" class="cancel-button">
+      Cancel
+    </ion-button>
+  </div>
+</ion-content>

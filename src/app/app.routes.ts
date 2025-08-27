@@ -9,4 +9,8 @@ export const routes: Routes = [
     path: 'author/:id',
     loadComponent: () => import('./pages/author-detail/author-detail.page').then( m => m.AuthorDetailPage)
   },
+  {
+    path: 'search/:term',
+    loadComponent: () => import('./pages/search-results/search-results.page').then( m => m.SearchResultsPage)
+  },
 ];

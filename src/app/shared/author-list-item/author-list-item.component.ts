@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonItem, IonAvatar, IonLabel, NavController } from '@ionic/angular/standalone';
 import { Author } from '../../core/models/author.model';
@@ -14,6 +14,8 @@ import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
 })
 export class AuthorListItemComponent {
   @Input() author!: Author;
+  @Input() disableNavigation: boolean = false;
+  @Output() authorClick = new EventEmitter<Author>();
 
   constructor(
     private apiConfig: ApiConfigService,
@@ -29,6 +31,16 @@ export class AuthorListItemComponent {
     return getAuthorImageUrl(this.author, serverUrl);
   }
   
+  handleClick() {
+    if (this.disableNavigation) {
+      // Emit event instead of navigating
+      this.authorClick.emit(this.author);
+    } else {
+      // Default behavior - navigate to author detail
+      this.navigateToAuthor();
+    }
+  }
+
   navigateToAuthor() {
     this.navCtrl.navigateForward(`/author/${this.author.id}`);
   }

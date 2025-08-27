@@ -11,6 +11,7 @@ import {
   close,
   documentTextOutline,
   folderOpenOutline,
+  informationCircleOutline,
   libraryOutline,
   star,
   time as timeIcon,
@@ -56,6 +57,7 @@ export class BookDetailModalComponent implements OnInit {
       calendarOutline,
       timeOutline,
       documentTextOutline,
+      informationCircleOutline,
       libraryOutline,
       folderOpenOutline,
       timeIcon,
@@ -64,6 +66,7 @@ export class BookDetailModalComponent implements OnInit {
       'calendar-outline': calendarOutline,
       'time-outline': timeOutline,
       'document-text-outline': documentTextOutline,
+      'information-circle-outline': informationCircleOutline,
       'library-outline': libraryOutline,
       'folder-open-outline': folderOpenOutline,
       'time': timeIcon
@@ -113,6 +116,12 @@ export class BookDetailModalComponent implements OnInit {
 
   async toggleMonitor() {
     if (this.isUpdatingMonitor) return;
+    
+    // Can't monitor a book without an ID
+    if (!this.book.id || this.book.id === 0) {
+      console.warn('Cannot monitor book without valid ID');
+      return;
+    }
 
     this.isUpdatingMonitor = true;
     try {
@@ -136,6 +145,13 @@ export class BookDetailModalComponent implements OnInit {
   }
 
   async loadBookFiles() {
+    // Skip if book has no ID (e.g., from search results)
+    if (!this.book.id || this.book.id === 0) {
+      this.bookFiles = [];
+      this.isLoadingFiles = false;
+      return;
+    }
+    
     this.isLoadingFiles = true;
     try {
       const files = await firstValueFrom(
@@ -151,6 +167,13 @@ export class BookDetailModalComponent implements OnInit {
   }
 
   async loadBookHistory() {
+    // Skip if book has no ID (e.g., from search results)
+    if (!this.book.id || this.book.id === 0) {
+      this.bookHistory = [];
+      this.isLoadingHistory = false;
+      return;
+    }
+    
     this.isLoadingHistory = true;
     try {
       const history = await firstValueFrom(

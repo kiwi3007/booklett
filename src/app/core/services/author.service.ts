@@ -223,4 +223,47 @@ export class AuthorService {
       })
     );
   }
+
+  /**
+   * Get quality profiles for a specific media type
+   * @param mediaType Type of media (audiobook or ebook)
+   */
+  getQualityProfiles(mediaType: 'audiobook' | 'ebook' = 'audiobook'): Observable<any[]> {
+    return this.http.get<any[]>(`/api/v1/qualityprofile?mediaType=${mediaType}`).pipe(
+      catchError(error => {
+        console.error('Error loading quality profiles:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Get metadata profiles for a specific media type
+   * @param mediaType Type of media (audiobook or ebook)
+   */
+  getMetadataProfiles(mediaType: 'audiobook' | 'ebook' = 'audiobook'): Observable<any[]> {
+    return this.http.get<any[]>(`/api/v1/metadataprofile?mediaType=${mediaType}`).pipe(
+      catchError(error => {
+        console.error('Error loading metadata profiles:', error);
+        return of([]);
+      })
+    );
+  }
+
+  /**
+   * Add a new author to the library
+   * @param author Author data to add
+   */
+  addAuthor(author: any): Observable<any> {
+    return this.http.post('/api/v1/author', author).pipe(
+      tap(() => {
+        // Refresh the authors list after adding
+        this.loadAuthors(true).subscribe();
+      }),
+      catchError(error => {
+        console.error('Error adding author:', error);
+        throw error; // Re-throw to handle in component
+      })
+    );
+  }
 }

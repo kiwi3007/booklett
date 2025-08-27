@@ -1,7 +1,7 @@
 import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
-import { ActionSheetController, PopoverController } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
+import { ActionSheetController, PopoverController, NavController } from '@ionic/angular/standalone';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { map, startWith, switchMap, take, skip, distinctUntilChanged } from 'rxjs/operators';
 import { AuthorService } from '../../core/services/author.service';
@@ -13,7 +13,7 @@ import { AuthorListItemComponent } from '../../shared/author-list-item/author-li
 import { BookCardComponent } from '../../shared/book-card/book-card.component';
 import { BookLibraryListItemComponent } from '../../shared/book-library-list-item/book-library-list-item.component';
 import { addIcons } from 'ionicons';
-import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline } from 'ionicons/icons';
+import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-library',
@@ -29,6 +29,7 @@ import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutli
     IonIcon,
     IonSearchbar,
     IonList,
+    IonItem,
     IonRefresher,
     IonRefresherContent,
     IonChip,
@@ -196,9 +197,10 @@ export class LibraryPage implements OnDestroy {
     private bookService: BookService,
     private actionSheetCtrl: ActionSheetController,
     private popoverCtrl: PopoverController,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private navCtrl: NavController
   ) {
-    addIcons({ swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline });
+    addIcons({ swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline });
     const savedView = (localStorage.getItem('library:view') as 'grid'|'list') ?? 'grid';
     this.view$.next(savedView);
     const savedLibraryType = (localStorage.getItem('library:type') as 'authors'|'books') ?? 'authors';
@@ -490,6 +492,11 @@ export class LibraryPage implements OnDestroy {
     if (infiniteScroll) {
       infiniteScroll.disabled = false;
     }
+  }
+
+  openGlobalSearch(term: string) {
+    if (!term?.trim()) return;
+    this.navCtrl.navigateForward(`/search/${encodeURIComponent(term.trim())}`);
   }
 
   ngOnDestroy() {

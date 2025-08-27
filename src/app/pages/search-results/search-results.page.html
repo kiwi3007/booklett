@@ -1,0 +1,94 @@
+<ion-header [translucent]="true" class="dark:!bg-transparent">
+  <ion-toolbar class="bg-surface/80 backdrop-blur">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/library" text="Back"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="font-semibold">Search</ion-title>
+  </ion-toolbar>
+  <ion-toolbar class="bg-surface">
+    <ion-searchbar
+      placeholder="Search for authors, books, series..."
+      [value]="searchTerm$ | async"
+      (ionInput)="onSearchInput($event)">
+    </ion-searchbar>
+  </ion-toolbar>
+  <ion-toolbar class="bg-surface">
+    <ion-segment [value]="filterType$ | async" (ionChange)="setFilterType($any($event.detail.value))" class="mx-4">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="author">
+        <ion-label>Authors</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="book">
+        <ion-label>Books</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="series">
+        <ion-label>Series</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="bg-bg">
+  <!-- Loading state -->
+  <div *ngIf="loading$ | async" class="flex h-full items-center justify-center">
+    <ion-spinner name="crescent" color="primary" class="text-4xl"></ion-spinner>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error$ | async as error" class="flex flex-col h-full items-center justify-center p-8">
+    <p class="text-muted text-center mb-4">{{ error }}</p>
+    <ion-button (click)="handleRefresh(null)" fill="outline" size="small">
+      Retry
+    </ion-button>
+  </div>
+
+  <!-- Results list -->
+  <ng-container *ngIf="!(loading$ | async) && !(error$ | async)">
+    <ion-list class="bg-transparent" *ngIf="filteredResults$ | async as results">
+      <!-- Empty state -->
+      <div *ngIf="results.length === 0 && (searchTerm$ | async)" class="flex flex-col h-full items-center justify-center p-8">
+        <ion-icon name="search-outline" class="text-6xl text-muted mb-4"></ion-icon>
+        <p class="text-muted text-center">No results for "{{ searchTerm$ | async }}"</p>
+      </div>
+
+      <!-- Results -->
+      <ng-container *ngFor="let result of results; trackBy: trackById">
+        <!-- Author result -->
+        <app-author-list-item 
+          *ngIf="result.resultType === 'author' && transformToAuthor(result) as author"
+          [author]="author"
+          [disableNavigation]="true"
+          (authorClick)="onAuthorClick(result)">
+        </app-author-list-item>
+
+        <!-- Book result -->
+        <app-book-library-list-item 
+          *ngIf="result.resultType === 'book' && transformToBook(result) as book"
+          [book]="book">
+        </app-book-library-list-item>
+
+        <!-- Series result -->
+        <ion-item 
+          *ngIf="result.resultType === 'series'"
+          button
+          (click)="onSeriesClick(result)"
+          class="bg-transparent">
+          <ion-icon name="albums-outline" slot="start" class="text-muted"></ion-icon>
+          <ion-label>
+            <h2 class="text-text">{{ result.series?.title }}</h2>
+            <p class="text-sm text-muted">
+              Series • {{ result.series?.workCount || 0 }} works
+            </p>
+          </ion-label>
+        </ion-item>
+      </ng-container>
+    </ion-list>
+  </ng-container>
+
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+</ion-content>

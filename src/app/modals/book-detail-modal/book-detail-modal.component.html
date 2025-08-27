@@ -52,9 +52,18 @@
         class="monitor-chip"
         [color]="book?.monitored ? 'success' : 'medium'"
         (click)="toggleMonitor()"
-        [disabled]="isUpdatingMonitor">
+        [disabled]="isUpdatingMonitor || !book?.id || book?.id === 0"
+        *ngIf="book?.id && book?.id !== 0">
         <ion-icon [name]="book?.monitored ? 'checkmark-circle' : 'add-circle-outline'"></ion-icon>
         <ion-label>{{ book?.monitored ? 'Monitored' : 'Not Monitored' }}</ion-label>
+      </ion-chip>
+      <!-- Show message if book is not in library -->
+      <ion-chip
+        class="monitor-chip"
+        color="warning"
+        *ngIf="!book?.id || book?.id === 0">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <ion-label>Not in Library</ion-label>
       </ion-chip>
     </div>
   </div>
@@ -127,7 +136,8 @@
 
       <div *ngIf="!isLoadingHistory && bookHistory.length === 0" class="empty-state">
         <ion-icon name="time-outline"></ion-icon>
-        <p>No history available for this book</p>
+        <p *ngIf="book?.id && book?.id !== 0">No history available for this book</p>
+        <p *ngIf="!book?.id || book?.id === 0">Book must be in library to view history</p>
       </div>
 
       <ion-list *ngIf="!isLoadingHistory && bookHistory.length > 0">
@@ -150,7 +160,8 @@
 
       <div *ngIf="!isLoadingFiles && bookFiles.length === 0" class="empty-state">
         <ion-icon name="folder-open-outline"></ion-icon>
-        <p>No files available for this book</p>
+        <p *ngIf="book?.id && book?.id !== 0">No files available for this book</p>
+        <p *ngIf="!book?.id || book?.id === 0">Book must be in library to view files</p>
       </div>
 
       <ion-list *ngIf="!isLoadingFiles && bookFiles.length > 0">
