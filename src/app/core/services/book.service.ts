@@ -36,8 +36,11 @@ export interface BookHistory {
   providedIn: 'root'
 })
 export class BookService {
-  private readonly booksCache$ = new BehaviorSubject<Book[] | null>(null);
-  private isLoadingBooks = false;
+  // Separate caches for audiobooks and ebooks
+  private readonly audiobooksCache$ = new BehaviorSubject<Book[] | null>(null);
+  private readonly ebooksCache$ = new BehaviorSubject<Book[] | null>(null);
+  private isLoadingAudiobooks = false;
+  private isLoadingEbooks = false;
   
   constructor(private http: HttpClient) {}
 
@@ -75,27 +78,49 @@ export class BookService {
   /**
    * Get all books - with caching
    * Only fetches from API if not cached or force refresh is requested
+   * @param mediaType - 'audiobook' or 'ebook'
+   * @param forceRefresh - Force refresh from API
    */
-  getAllBooks(forceRefresh: boolean = false): Observable<Book[]> {
+  getAllBooks(mediaType: 'audiobook' | 'ebook' = 'audiobook', forceRefresh: boolean = false): Observable<Book[]> {
+    // Select the appropriate cache based on media type
+    const cache$ = mediaType === 'audiobook' ? this.audiobooksCache$ : this.ebooksCache$;
+    const isLoading = mediaType === 'audiobook' ? this.isLoadingAudiobooks : this.isLoadingEbooks;
+    
     // If we have cached data and not forcing refresh, return cached data
-    if (!forceRefresh && this.booksCache$.value !== null) {
-      return of(this.booksCache$.value);
+    if (!forceRefresh && cache$.value !== null) {
+      return of(cache$.value);
     }
     
-    // If already loading, return the current cache observable
-    if (this.isLoadingBooks && !forceRefresh) {
-      return of([]); // Return empty array while loading
+    // If already loading, return empty array
+    if (isLoading && !forceRefresh) {
+      return of([]);
     }
     
-    this.isLoadingBooks = true;
-    return this.http.get<Book[]>(`/api/v1/book`).pipe(
+    // Set loading state
+    if (mediaType === 'audiobook') {
+      this.isLoadingAudiobooks = true;
+    } else {
+      this.isLoadingEbooks = true;
+    }
+    
+    return this.http.get<Book[]>(`/api/v1/book`, {
+      params: { mediaType }
+    }).pipe(
       tap(books => {
-        this.booksCache$.next(books);
-        this.isLoadingBooks = false;
+        cache$.next(books);
+        if (mediaType === 'audiobook') {
+          this.isLoadingAudiobooks = false;
+        } else {
+          this.isLoadingEbooks = false;
+        }
       }),
       catchError(error => {
-        console.error('Error loading books:', error);
-        this.isLoadingBooks = false;
+        console.error(`Error loading ${mediaType}s:`, error);
+        if (mediaType === 'audiobook') {
+          this.isLoadingAudiobooks = false;
+        } else {
+          this.isLoadingEbooks = false;
+        }
         // Return empty array on error but don't cache it
         return of([]);
       })
@@ -104,23 +129,32 @@ export class BookService {
   
   /**
    * Force refresh books from the API
+   * @param mediaType - 'audiobook' or 'ebook'
    */
-  refreshBooks(): Observable<Book[]> {
-    return this.getAllBooks(true);
+  refreshBooks(mediaType: 'audiobook' | 'ebook' = 'audiobook'): Observable<Book[]> {
+    return this.getAllBooks(mediaType, true);
   }
   
   /**
    * Get cached books synchronously (may be null if not loaded yet)
+   * @param mediaType - 'audiobook' or 'ebook'
    */
-  getCachedBooks(): Book[] | null {
-    return this.booksCache$.value;
+  getCachedBooks(mediaType: 'audiobook' | 'ebook' = 'audiobook'): Book[] | null {
+    const cache$ = mediaType === 'audiobook' ? this.audiobooksCache$ : this.ebooksCache$;
+    return cache$.value;
   }
   
   /**
    * Clear the books cache
+   * @param mediaType - Optional, if not provided clears both caches
    */
-  clearBooksCache(): void {
-    this.booksCache$.next(null);
+  clearBooksCache(mediaType?: 'audiobook' | 'ebook'): void {
+    if (!mediaType || mediaType === 'audiobook') {
+      this.audiobooksCache$.next(null);
+    }
+    if (!mediaType || mediaType === 'ebook') {
+      this.ebooksCache$.next(null);
+    }
   }
 
   /**

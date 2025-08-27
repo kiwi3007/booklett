@@ -1,9 +1,9 @@
 <ion-header [translucent]="true" class="dark:!bg-transparent">
   <ion-toolbar class="bg-surface/80 backdrop-blur">
-    <ion-select 
-      slot="start" 
-      interface="popover" 
-      [value]="libraryType$ | async" 
+    <ion-select
+      slot="start"
+      interface="popover"
+      [value]="libraryType$ | async"
       (ionChange)="setLibraryType($event.detail.value)"
       class="font-semibold ml-2 min-w-[120px] max-w-[150px]">
       <ion-select-option value="authors">
@@ -24,11 +24,24 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <!-- Segment toolbar for books library type -->
+  <ion-toolbar class="bg-surface" *ngIf="(libraryType$ | async) === 'books'">
+    <ion-segment
+      class="w-full mx-3 mb-1"
+      [value]="bookMediaType$ | async"
+      (ionChange)="setBookMediaType($any($event.detail.value))">
+      <ion-segment-button value="audiobook">
+        <ion-label>Audiobooks</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="ebook">
+        <ion-label>Ebooks</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
   <ion-toolbar class="bg-surface">
-    <ion-searchbar 
-      [placeholder]="(libraryType$ | async) === 'authors' ? 'Search authors' : 'Search books'" 
-      (ionInput)="onSearch($event)" 
-      class="px-2"></ion-searchbar>
+    <ion-searchbar
+      [placeholder]="(libraryType$ | async) === 'authors' ? 'Search authors' : 'Search books'"
+      (ionInput)="onSearch($event)"></ion-searchbar>
     <div class="flex items-center gap-2 px-4 pb-2">
       <ion-chip (click)="presentSortOptions()" class="bg-card">
         <ion-icon name="filter-outline" class="text-muted"></ion-icon>
@@ -43,7 +56,7 @@
           {{ getDisplayedCount() }} / {{ getTotalCount() }} authors
         </ng-container>
         <ng-container *ngIf="(libraryType$ | async) === 'books'">
-          {{ getDisplayedCount() }} / {{ getTotalCount() }} books
+          {{ getDisplayedCount() }} / {{ getTotalCount() }} {{ (bookMediaType$ | async) === 'audiobook' ? 'audiobooks' : 'ebooks' }}
         </ng-container>
       </div>
     </div>
@@ -57,7 +70,7 @@
       <div *ngIf="isLoadingAuthors" class="flex items-center justify-center h-full">
         <ion-spinner name="crescent" color="primary" class="text-4xl"></ion-spinner>
       </div>
-      
+
       <ng-container *ngIf="!isLoadingAuthors && (view$ | async) as view">
         <!-- Author Grid view -->
         <div *ngIf="view === 'grid'; else authorListView"
@@ -77,13 +90,13 @@
         </ng-template>
       </ng-container>
     </ng-container>
-    
+
     <ng-container *ngIf="libraryType === 'books'">
       <!-- Loading spinner for books -->
       <div *ngIf="isLoadingBooks" class="flex items-center justify-center h-full">
         <ion-spinner name="crescent" color="primary" class="text-4xl"></ion-spinner>
       </div>
-      
+
       <ng-container *ngIf="!isLoadingBooks && (view$ | async) as view">
         <!-- Book Grid view -->
         <div *ngIf="view === 'grid'; else bookListView"

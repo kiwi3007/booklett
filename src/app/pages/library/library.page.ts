@@ -1,6 +1,6 @@
 import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
 import { ActionSheetController, PopoverController } from '@ionic/angular/standalone';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { map, startWith, switchMap, take, skip, distinctUntilChanged } from 'rxjs/operators';
@@ -38,6 +38,8 @@ import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutli
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonSpinner,
+    IonSegment,
+    IonSegmentButton,
     AuthorCardComponent,
     AuthorListItemComponent,
     BookCardComponent,
@@ -47,6 +49,7 @@ import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutli
 export class LibraryPage implements OnDestroy {
   view$ = new BehaviorSubject<'grid' | 'list'>('grid');
   libraryType$ = new BehaviorSubject<'authors' | 'books'>('authors');
+  bookMediaType$ = new BehaviorSubject<'audiobook' | 'ebook'>('audiobook');
   search$ = new BehaviorSubject<string>('');
   authorSort$ = new BehaviorSubject<AuthorSort>('firstName');
   bookSort$ = new BehaviorSubject<'title' | 'releaseDate' | 'added' | 'monitored'>('title');
@@ -75,12 +78,12 @@ export class LibraryPage implements OnDestroy {
     })
   );
 
-  books$: Observable<Book[]> = combineLatest([this.search$, this.bookSort$, this.order$]).pipe(
-    switchMap(([search, sort, order]) => {
+  books$: Observable<Book[]> = combineLatest([this.search$, this.bookSort$, this.order$, this.bookMediaType$]).pipe(
+    switchMap(([search, sort, order, mediaType]) => {
       // First get all authors, then get all books and enrich them
       return combineLatest([
         this.authorService.loadAuthors(),
-        this.bookService.getAllBooks()
+        this.bookService.getAllBooks(mediaType)
       ]).pipe(
         map(([authors, books]) => {
           // Create a map of authors by ID for quick lookup (convert string ID to number)
@@ -200,6 +203,8 @@ export class LibraryPage implements OnDestroy {
     this.view$.next(savedView);
     const savedLibraryType = (localStorage.getItem('library:type') as 'authors'|'books') ?? 'authors';
     this.libraryType$.next(savedLibraryType);
+    const savedBookMediaType = (localStorage.getItem('library:bookMediaType') as 'audiobook'|'ebook') ?? 'audiobook';
+    this.bookMediaType$.next(savedBookMediaType);
 
     // Initialize data loading
     setTimeout(() => {
@@ -218,7 +223,7 @@ export class LibraryPage implements OnDestroy {
     this.subscriptions.add(libraryTypeSub);
 
     // Subscribe to filter/sort changes separately and skip initial values
-    const filterSub = combineLatest([this.search$, this.authorSort$, this.bookSort$, this.order$]).pipe(
+    const filterSub = combineLatest([this.search$, this.authorSort$, this.bookSort$, this.order$, this.bookMediaType$]).pipe(
       skip(1) // Skip initial emission to avoid double initialization
     ).subscribe(() => {
       // Reset the infinite scroll and re-initialize when filters change
@@ -240,6 +245,11 @@ export class LibraryPage implements OnDestroy {
   setLibraryType(type: 'authors' | 'books') {
     this.libraryType$.next(type);
     localStorage.setItem('library:type', type);
+  }
+
+  setBookMediaType(type: 'audiobook' | 'ebook') {
+    this.bookMediaType$.next(type);
+    localStorage.setItem('library:bookMediaType', type);
   }
 
   setSort(s: AuthorSort | string) {
@@ -453,7 +463,7 @@ export class LibraryPage implements OnDestroy {
         }
       });
     } else {
-      this.bookService.refreshBooks().subscribe({
+      this.bookService.refreshBooks(this.bookMediaType$.value).subscribe({
         next: () => {
           // Force reload the data after refresh
           this.initializeData();
