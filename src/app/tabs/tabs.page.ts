@@ -78,15 +78,7 @@ export class TabsPage implements OnInit {
       await loading.dismiss();
 
       if (status.isConnected) {
-        // Connection successful
-        const toast = await this.toastCtrl.create({
-          message: `Connected to ${status.systemInfo?.instanceName || 'Chaptarr'} v${status.systemInfo?.version || ''}`,
-          duration: 3000,
-          position: 'bottom',
-          color: 'success'
-        });
-        await toast.present();
-        
+        // Connection successful - silently refresh data
         // Trigger a refresh of authors and books after successful authentication
         // This ensures data loads properly after the user authenticates
         this.authorService.refresh().subscribe();
