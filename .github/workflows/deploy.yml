@@ -32,7 +32,7 @@ jobs:
         run: npm ci
 
       - name: Build Angular app
-        run: npm run build -- --base-href /chaptarr-mobile/
+        run: npm run build -- --base-href /
         env:
           CI: true
 
