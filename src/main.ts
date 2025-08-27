@@ -10,11 +10,16 @@ import { apiInterceptor } from './app/core/interceptors/api.interceptor';
 import { ServerSettingsService } from './app/core/services/server-settings.service';
 import { ThemeService } from './app/core/services/theme.service';
 import { provideServiceWorker } from '@angular/service-worker';
+import { suppressBrowserExtensionErrors } from './app/core/utils/error-suppressor';
 
 export function initApp() {
   return async () => {
     const theme = inject(ThemeService);
     const server = inject(ServerSettingsService);
+    
+    // Suppress browser extension errors in production
+    suppressBrowserExtensionErrors();
+    
     await server.init();
     await theme.init();
   };

@@ -1,4 +1,4 @@
-<ion-card [routerLink]="['/author', author.id]" class="overflow-hidden rounded-xl bg-card shadow-sm dark:shadow-none cursor-pointer">
+<ion-card (click)="navigateToAuthor()" class="overflow-hidden rounded-xl bg-card shadow-sm dark:shadow-none cursor-pointer">
   <div class="relative aspect-[3/4] bg-surface overflow-hidden">
     <!-- Blurred background image -->
     <img [src]="authorImage"
