@@ -48,8 +48,8 @@ export class SettingsPage {
   async openServerSettings() {
     const modal = await this.modalCtrl.create({
       component: ServerSettingsPage,
-      breakpoints: [0, 0.5, 1],
-      initialBreakpoint: 0.5,
+      breakpoints: [0, 1],
+      initialBreakpoint: 1,
       canDismiss: true,
       handleBehavior: 'cycle',
       cssClass: 'server-settings-modal'
