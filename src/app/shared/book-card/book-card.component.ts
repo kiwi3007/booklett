@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonCard, IonCardContent, IonIcon, IonBadge } from '@ionic/angular/standalone';
-import { AuthenticatedImageDirective } from '../directives/authenticated-image.directive';
 import { Book } from '../../core/models/book.model';
 import { BookService } from '../../core/services/book.service';
 import { Router } from '@angular/router';
@@ -22,7 +21,6 @@ import { ServerSettingsService } from '../../core/services/server-settings.servi
     IonCardContent,
     IonIcon,
     IonBadge,
-    AuthenticatedImageDirective
   ],
   standalone: true
 })
@@ -43,7 +41,8 @@ export class BookCardComponent {
   }
 
   get coverImageUrl(): string {
-    return getBookCoverUrl(this.book, this.serverBaseUrl);
+    const apiKey = this.serverSettingsService.getApiKey();
+    return getBookCoverUrl(this.book, this.serverBaseUrl, apiKey);
   }
 
   get authorName(): string {

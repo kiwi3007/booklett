@@ -27,7 +27,7 @@
       <ng-container *ngIf="(searchResults ? searchResults.length : items.length) > 0; else emptyTpl">
         <ion-item button detail (click)="onItemClick(rec)" *ngFor="let rec of (searchResults ? searchResults : items)">
           <ion-avatar slot="start" (click)="toggleSelect(rec, $event)" [class.selected]="isSelected(rec)">
-            <img [src]="rec.images?.[0]?.url || rec.author?.images?.[0]?.url" alt="cover" />
+            <img [src]="getImageUrl(rec)" alt="cover" />
           </ion-avatar>
           <ion-label>
             <h3>{{ rec.title }}</h3>

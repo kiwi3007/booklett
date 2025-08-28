@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { IonItem, IonAvatar, IonLabel, NavController } from '@ionic/angular/standalone';
-import { AuthenticatedImageDirective } from '../directives/authenticated-image.directive';
 import { Author } from '../../core/models/author.model';
 import { ApiConfigService } from '../../core/services/api-config.service';
 import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
@@ -11,7 +10,7 @@ import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
   templateUrl: './author-list-item.component.html',
   styleUrls: ['./author-list-item.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonItem, IonAvatar, IonLabel, AuthenticatedImageDirective]
+  imports: [CommonModule, IonItem, IonAvatar, IonLabel]
 })
 export class AuthorListItemComponent {
   @Input() author!: Author;
@@ -29,7 +28,8 @@ export class AuthorListItemComponent {
 
   get authorImage(): string {
     const serverUrl = this.apiConfig.getBaseUrlSync();
-    return getAuthorImageUrl(this.author, serverUrl);
+    const apiKey = this.apiConfig.getApiKeySync();
+    return getAuthorImageUrl(this.author, serverUrl, apiKey);
   }
   
   handleClick() {

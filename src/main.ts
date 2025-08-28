@@ -7,7 +7,6 @@ import { APP_INITIALIZER, inject, isDevMode } from '@angular/core';
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { apiInterceptor } from './app/core/interceptors/api.interceptor';
-import { imageInterceptor } from './app/core/interceptors/image.interceptor';
 import { ServerSettingsService } from './app/core/services/server-settings.service';
 import { ThemeService } from './app/core/services/theme.service';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -30,7 +29,7 @@ bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: APP_INITIALIZER, useFactory: initApp, multi: true },
-    provideHttpClient(withInterceptors([imageInterceptor, apiInterceptor])),
+    provideHttpClient(withInterceptors([apiInterceptor])),
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)), provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),

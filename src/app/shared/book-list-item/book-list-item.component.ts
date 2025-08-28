@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { IonItem, IonLabel, IonThumbnail, IonIcon, IonChip, IonSpinner } from '@ionic/angular/standalone';
 import { Book } from '../../core/models/book.model';
-import { AuthenticatedImageDirective } from '../directives/authenticated-image.directive';
 import { addIcons } from 'ionicons';
 import { calendarOutline, starOutline, downloadOutline, checkmarkCircleOutline, cloudDownloadOutline } from 'ionicons/icons';
 import { ApiConfigService } from '../../core/services/api-config.service';
@@ -13,7 +12,7 @@ import { getBookCoverUrl } from '../../core/utils/image-url.utils';
   templateUrl: './book-list-item.component.html',
   styleUrls: ['./book-list-item.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonItem, IonLabel, IonThumbnail, IonIcon, IonChip, IonSpinner, AuthenticatedImageDirective]
+  imports: [CommonModule, IonItem, IonLabel, IonThumbnail, IonIcon, IonChip, IonSpinner]
 })
 export class BookListItemComponent {
   @Input() book!: Book;
@@ -31,7 +30,8 @@ export class BookListItemComponent {
 
   get bookImage(): string {
     const serverUrl = this.apiConfig.getBaseUrlSync();
-    return getBookCoverUrl(this.book, serverUrl);
+    const apiKey = this.apiConfig.getApiKeySync();
+    return getBookCoverUrl(this.book, serverUrl, apiKey);
   }
 
   get releaseYear(): string {

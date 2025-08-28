@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthenticatedImageDirective } from '../../shared/directives/authenticated-image.directive';
 import { DomSanitizer } from '@angular/platform-browser';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
@@ -28,7 +27,7 @@ import { getBookCoverUrl } from '../../core/utils/image-url.utils';
   templateUrl: './book-detail-modal.component.html',
   styleUrls: ['./book-detail-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, FormsModule, AuthenticatedImageDirective]
+  imports: [CommonModule, IonicModule, FormsModule]
 })
 export class BookDetailModalComponent implements OnInit {
   @Input() book: any;
@@ -191,7 +190,8 @@ export class BookDetailModalComponent implements OnInit {
 
   getBookCover(): string {
     const serverUrl = this.apiConfig.getBaseUrlSync();
-    return getBookCoverUrl(this.book, serverUrl);
+    const apiKey = this.apiConfig.getApiKeySync();
+    return getBookCoverUrl(this.book, serverUrl, apiKey);
   }
 
   formatDuration(minutes: number): string {

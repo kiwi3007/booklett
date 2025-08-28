@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonAvatar, IonSearchbar, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, ModalController, IonRefresher, IonRefresherContent, IonButton } from '@ionic/angular/standalone';
 import { BookService } from '../../core/services/book.service';
+import { ApiConfigService } from '../../core/services/api-config.service';
+import { getBookCoverUrl, getAuthorImageUrl } from '../../core/utils/image-url.utils';
 import { Subject, debounceTime, distinctUntilChanged, firstValueFrom, takeUntil } from 'rxjs';
 import { BookDetailModalComponent } from '../../modals/book-detail-modal/book-detail-modal.component';
 
@@ -19,6 +21,27 @@ import { BookDetailModalComponent } from '../../modals/book-detail-modal/book-de
   ],
 })
 export class WantedPage implements OnInit, OnDestroy {
+  private serverUrl: string | null;
+  private apiKey: string | null;
+
+  constructor(
+    private books: BookService,
+    private modalCtrl: ModalController,
+    private apiConfig: ApiConfigService
+  ) {
+    this.serverUrl = this.apiConfig.getBaseUrlSync();
+    this.apiKey = this.apiConfig.getApiKeySync();
+  }
+
+  getImageUrl(rec: any): string {
+    if (rec?.images?.[0]?.url) {
+      return getBookCoverUrl({ images: rec.images }, this.serverUrl, this.apiKey);
+    }
+    if (rec?.author?.images?.[0]?.url) {
+      return getAuthorImageUrl({ images: rec.author.images }, this.serverUrl, this.apiKey);
+    }
+    return 'assets/no-cover.svg';
+  }
   items: any[] = [];
   totalRecords = 0;
   page = 1;
@@ -56,7 +79,6 @@ export class WantedPage implements OnInit, OnDestroy {
     return this.items.length < this.totalRecords && !this.searchTerm;
   }
 
-  constructor(private books: BookService, private modalCtrl: ModalController) {}
 
   ngOnInit(): void {
     this.loadingInitial = true;
