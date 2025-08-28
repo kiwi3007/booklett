@@ -1,5 +1,6 @@
 # Stage 1: Build the application
-FROM node:18-alpine AS build
+# UPDATED LINE: Changed from node:18-alpine to node:20-alpine
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
