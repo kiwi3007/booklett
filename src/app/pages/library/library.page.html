@@ -34,7 +34,7 @@
         <ion-label>Audiobooks</ion-label>
       </ion-segment-button>
       <ion-segment-button value="ebook">
-        <ion-label>Ebooks</ion-label>
+        <ion-label>eBooks</ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
@@ -161,7 +161,7 @@
       </ion-infinite-scroll-content>
     </ion-infinite-scroll>
   </ng-container>
-  
+
   <!-- Only show refresher control when base URL is configured -->
   <ion-refresher *ngIf="hasValidBaseUrl()" slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
