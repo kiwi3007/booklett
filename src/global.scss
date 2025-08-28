@@ -466,7 +466,14 @@ ion-action-sheet {
 ion-toast {
   --background: var(--ion-color-step-850);
   --color: var(--ion-color-step-50);
-  --button-color: var(--ion-color-primary);
+  --button-color: var(--ion-color-primary-tint);
+}
+
+/* Ensure better contrast for toast buttons in dark mode */
+.dark ion-toast,
+body.dark ion-toast,
+:root.dark ion-toast {
+  --button-color: var(--ion-color-primary-contrast);
 }
 
 /* Fix loading theming */
