@@ -1,6 +1,6 @@
 <ion-item lines="none" class="bg-card rounded-xl my-2" (click)="onBookClick()" button>
   <ion-thumbnail slot="start" class="w-16 h-24">
-    <img [src]="bookImage" [alt]="book.title" loading="lazy" class="object-cover rounded" />
+<img [appAuthenticatedImage]="bookImage" [alt]="book.title" loading="lazy" class="object-cover rounded" />
   </ion-thumbnail>
   <ion-label>
     <h3 class="font-medium text-text">

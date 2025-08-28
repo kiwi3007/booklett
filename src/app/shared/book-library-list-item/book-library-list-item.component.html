@@ -1,6 +1,6 @@
 <ion-item class="bg-transparent cursor-pointer" (click)="handleClick()">
   <ion-avatar slot="start">
-    <img [src]="coverImageUrl" [alt]="book.title" />
+<img [appAuthenticatedImage]="coverImageUrl" [alt]="book.title" />
   </ion-avatar>
   
   <ion-label>

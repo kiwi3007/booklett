@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { IonItem, IonAvatar, IonLabel, NavController } from '@ionic/angular/standalone';
+import { AuthenticatedImageDirective } from '../directives/authenticated-image.directive';
 import { Author } from '../../core/models/author.model';
 import { ApiConfigService } from '../../core/services/api-config.service';
 import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
@@ -10,7 +11,7 @@ import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
   templateUrl: './author-list-item.component.html',
   styleUrls: ['./author-list-item.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonItem, IonAvatar, IonLabel]
+  imports: [CommonModule, IonItem, IonAvatar, IonLabel, AuthenticatedImageDirective]
 })
 export class AuthorListItemComponent {
   @Input() author!: Author;

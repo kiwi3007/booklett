@@ -2,14 +2,14 @@
   <div class="aspect-[2/3] relative bg-surface overflow-hidden">
     <!-- Blurred background image -->
     <img 
-      [src]="coverImageUrl" 
+      [appAuthenticatedImage]="coverImageUrl" 
       [alt]="book.title"
       class="absolute inset-0 w-full h-full object-cover opacity-50 dark:opacity-30 blur-xl scale-110"
       loading="lazy"
     />
     <!-- Main image -->
     <img 
-      [src]="coverImageUrl" 
+      [appAuthenticatedImage]="coverImageUrl" 
       [alt]="book.title"
       class="relative w-full h-full object-contain z-10"
       loading="lazy"

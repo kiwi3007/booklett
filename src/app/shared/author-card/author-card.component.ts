@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonCard, IonCardHeader, IonCardTitle, IonBadge, NavController } from '@ionic/angular/standalone';
+import { AuthenticatedImageDirective } from '../directives/authenticated-image.directive';
 import { Author } from '../../core/models/author.model';
 import { ApiConfigService } from '../../core/services/api-config.service';
 import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
@@ -10,7 +11,7 @@ import { getAuthorImageUrl } from '../../core/utils/image-url.utils';
   templateUrl: './author-card.component.html',
   styleUrls: ['./author-card.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonCard, IonCardHeader, IonCardTitle, IonBadge]
+  imports: [CommonModule, IonCard, IonCardHeader, IonCardTitle, IonBadge, AuthenticatedImageDirective]
 })
 export class AuthorCardComponent {
   @Input() author!: Author;

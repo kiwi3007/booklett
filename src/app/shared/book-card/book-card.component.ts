@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonCard, IonCardContent, IonIcon, IonBadge } from '@ionic/angular/standalone';
+import { AuthenticatedImageDirective } from '../directives/authenticated-image.directive';
 import { Book } from '../../core/models/book.model';
 import { BookService } from '../../core/services/book.service';
 import { Router } from '@angular/router';
@@ -20,7 +21,8 @@ import { ServerSettingsService } from '../../core/services/server-settings.servi
     IonCard,
     IonCardContent,
     IonIcon,
-    IonBadge
+    IonBadge,
+    AuthenticatedImageDirective
   ],
   standalone: true
 })
