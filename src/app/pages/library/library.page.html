@@ -147,12 +147,14 @@
     </ng-container>
   </ng-container>
 
-  <ion-infinite-scroll (ionInfinite)="loadData($event)" threshold="200px">
-    <ion-infinite-scroll-content
-      loadingSpinner="bubbles"
-      loadingText="Loading more...">
-    </ion-infinite-scroll-content>
-  </ion-infinite-scroll>
+  <ng-container *ngIf="hasValidBaseUrl()">
+    <ion-infinite-scroll (ionInfinite)="loadData($event)" threshold="200px">
+      <ion-infinite-scroll-content
+        loadingSpinner="bubbles"
+        loadingText="Loading more...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  </ng-container>
   
   <!-- Only show refresher control when base URL is configured -->
   <ion-refresher *ngIf="hasValidBaseUrl()" slot="fixed" (ionRefresh)="handleRefresh($event)">

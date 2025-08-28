@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
@@ -196,7 +196,7 @@ export class LibraryPage implements OnDestroy {
     })
   );
 
-constructor(
+  constructor(
     private authorService: AuthorService,
     private bookService: BookService,
     private actionSheetCtrl: ActionSheetController,
@@ -213,10 +213,8 @@ constructor(
     const savedBookMediaType = (localStorage.getItem('library:bookMediaType') as 'audiobook'|'ebook') ?? 'audiobook';
     this.bookMediaType$.next(savedBookMediaType);
 
-    // Initialize data loading
-    setTimeout(() => {
-      this.initializeData();
-    }, 100);
+    // Initialize data loading and watch for base URL changes
+    this.initializeWithBaseUrlHandling();
 
     // Subscribe to library type changes only
     const libraryTypeSub = this.libraryType$.pipe(
@@ -238,9 +236,24 @@ constructor(
       this.initializeData();
     });
     this.subscriptions.add(filterSub);
+  }
 
-    // Note: data will refresh after configuration via TabsPage flow
-    // which triggers author and book services to refresh after successful connection.
+  private initializeWithBaseUrlHandling(): void {
+    // Initial data load attempt
+    this.initializeData();
+
+    // Set up an effect to watch the base URL
+    effect(() => {
+      const baseUrl = this.apiConfig.baseUrl();
+      if (baseUrl) {
+        // Only attempt to load data if we have a valid base URL
+        this.initializeData();
+      } else {
+        // Reset loading states when base URL is cleared
+        this.isLoadingAuthors = false;
+        this.isLoadingBooks = false;
+      }
+    });
   }
 
   onSearch(ev: CustomEvent): void {
