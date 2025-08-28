@@ -97,17 +97,20 @@
             <app-author-list-item *ngFor="let a of displayedAuthors; trackBy: trackById"
                                   [author]="a">
             </app-author-list-item>
-            <!-- Search suggestion row -->
-            <ng-container *ngIf="(search$ | async) as term">
-              <ion-item button (click)="openGlobalSearch(term)" *ngIf="term" class="bg-transparent">
-                <ion-icon name="search-outline" slot="start" class="text-muted"></ion-icon>
-                <ion-label class="text-text">
-                  Search for "{{ term }}"...
-                </ion-label>
-              </ion-item>
-            </ng-container>
           </ion-list>
         </ng-template>
+
+        <!-- Search suggestion row (shown in both views) -->
+        <ng-container *ngIf="(search$ | async) as term">
+          <ion-list class="bg-transparent mt-4" *ngIf="term">
+            <ion-item button (click)="openGlobalSearch(term)" class="bg-transparent">
+              <ion-icon name="search-outline" slot="start" class="text-muted"></ion-icon>
+              <ion-label class="text-text">
+                Search for "{{ term }}"...
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ng-container>
       </ng-container>
     </ng-container>
 
@@ -132,17 +135,20 @@
             <app-book-library-list-item *ngFor="let b of displayedBooks; trackBy: trackById"
                                         [book]="b">
             </app-book-library-list-item>
-            <!-- Search suggestion row -->
-            <ng-container *ngIf="(search$ | async) as term">
-              <ion-item button (click)="openGlobalSearch(term)" *ngIf="term" class="bg-transparent">
-                <ion-icon name="search-outline" slot="start" class="text-muted"></ion-icon>
-                <ion-label class="text-text">
-                  Search for "{{ term }}"...
-                </ion-label>
-              </ion-item>
-            </ng-container>
           </ion-list>
         </ng-template>
+
+        <!-- Search suggestion row (shown in both views) -->
+        <ng-container *ngIf="(search$ | async) as term">
+          <ion-list class="bg-transparent mt-4" *ngIf="term">
+            <ion-item button (click)="openGlobalSearch(term)" class="bg-transparent">
+              <ion-icon name="search-outline" slot="start" class="text-muted"></ion-icon>
+              <ion-label class="text-text">
+                Search for "{{ term }}"...
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ng-container>
       </ng-container>
     </ng-container>
   </ng-container>
