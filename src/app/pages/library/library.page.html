@@ -64,7 +64,18 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="bg-bg">
-  <ng-container *ngIf="(libraryType$ | async) as libraryType">
+  <!-- Server not configured message -->
+  <div *ngIf="!hasValidBaseUrl()" class="flex flex-col items-center justify-center h-full p-4 text-center">
+    <ion-icon name="warning-outline" class="text-4xl text-warning mb-2"></ion-icon>
+    <h2 class="text-xl font-semibold mb-2">Server Not Configured</h2>
+    <p class="text-muted">Please configure your server settings before accessing the library.</p>
+    <ion-button routerLink="/settings" class="mt-4">
+      Go to Settings
+    </ion-button>
+  </div>
+
+  <!-- Library content -->
+  <ng-container *ngIf="hasValidBaseUrl() && (libraryType$ | async) as libraryType">
     <ng-container *ngIf="libraryType === 'authors'">
       <!-- Loading spinner for authors -->
       <div *ngIf="isLoadingAuthors" class="flex items-center justify-center h-full">

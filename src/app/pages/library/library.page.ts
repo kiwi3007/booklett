@@ -1,6 +1,7 @@
 import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton, RouterLink } from '@ionic/angular/standalone';
+import { ApiConfigService } from '../../core/services/api-config.service';
 import { ActionSheetController, PopoverController, NavController } from '@ionic/angular/standalone';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { map, startWith, switchMap, take, skip, distinctUntilChanged } from 'rxjs/operators';
@@ -192,14 +193,15 @@ export class LibraryPage implements OnDestroy {
     })
   );
 
-  constructor(
+constructor(
     private authorService: AuthorService,
     private bookService: BookService,
     private actionSheetCtrl: ActionSheetController,
     private popoverCtrl: PopoverController,
     private cdr: ChangeDetectorRef,
-    private navCtrl: NavController
-  ) {
+    private navCtrl: NavController,
+    private apiConfig: ApiConfigService
+  )
     addIcons({ swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline });
     const savedView = (localStorage.getItem('library:view') as 'grid'|'list') ?? 'grid';
     this.view$.next(savedView);
@@ -233,6 +235,15 @@ export class LibraryPage implements OnDestroy {
       this.initializeData();
     });
     this.subscriptions.add(filterSub);
+
+    // Subscribe to server settings changes
+    const settingsSub = this.apiConfig.baseUrl.subscribe(() => {
+      if (this.hasValidBaseUrl()) {
+        this.resetInfiniteScroll();
+        this.initializeData();
+      }
+    });
+    this.subscriptions.add(settingsSub);
   }
 
   onSearch(ev: CustomEvent) {
@@ -357,6 +368,12 @@ export class LibraryPage implements OnDestroy {
   }
 
   private initializeData() {
+    if (!this.hasValidBaseUrl()) {
+      this.isLoadingAuthors = false;
+      this.isLoadingBooks = false;
+      return;
+    }
+
     if (this.libraryType$.value === 'authors') {
       this.loadAuthors();
     } else {
@@ -365,6 +382,11 @@ export class LibraryPage implements OnDestroy {
   }
 
   private loadAuthors() {
+    if (!this.hasValidBaseUrl()) {
+      this.isLoadingAuthors = false;
+      return;
+    }
+    
     // Show loading indicator
     this.isLoadingAuthors = true;
     
@@ -392,6 +414,11 @@ export class LibraryPage implements OnDestroy {
   }
 
   private loadBooks() {
+    if (!this.hasValidBaseUrl()) {
+      this.isLoadingBooks = false;
+      return;
+    }
+    
     // Show loading indicator
     this.isLoadingBooks = true;
     
@@ -435,6 +462,11 @@ export class LibraryPage implements OnDestroy {
   }
 
   loadData(event: any) {
+    if (!this.hasValidBaseUrl()) {
+      event.target.complete();
+      return;
+    }
+
     setTimeout(() => {
       if (this.libraryType$.value === 'authors') {
         this.loadMoreAuthors();
@@ -453,6 +485,11 @@ export class LibraryPage implements OnDestroy {
   }
 
   handleRefresh(event: CustomEvent) {
+    if (!this.hasValidBaseUrl()) {
+      (event.target as any).complete();
+      return;
+    }
+
     if (this.libraryType$.value === 'authors') {
       this.authorService.refresh().subscribe({
         next: () => {
@@ -486,12 +523,16 @@ export class LibraryPage implements OnDestroy {
     return this.libraryType$.value === 'authors' ? this.displayedAuthors.length : this.displayedBooks.length;
   }
 
-  private resetInfiniteScroll() {
+private resetInfiniteScroll() {
     // Find and reset the ion-infinite-scroll element
     const infiniteScroll = document.querySelector('ion-infinite-scroll') as any;
     if (infiniteScroll) {
       infiniteScroll.disabled = false;
     }
+  }
+
+  private hasValidBaseUrl(): boolean {
+    return !!this.apiConfig.getBaseUrlSync();
   }
 
   openGlobalSearch(term: string) {
