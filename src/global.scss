@@ -496,3 +496,30 @@ ion-alert {
     color: var(--ion-color-primary);
   }
 }
+
+/* Fix datetime theming (dark/light) */
+ion-datetime {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+  --title-color: var(--ion-text-color);
+  --wheel-background: var(--ion-item-background);
+  --wheel-color: var(--ion-text-color);
+  --active-wheel-color: var(--ion-color-primary);
+  --active-wheel-background: transparent;
+  --border-color: var(--ion-border-color);
+  color-scheme: light; /* default */
+}
+
+/* When using dark mode class or prefers dark, force dark color-scheme */
+.dark ion-datetime,
+body.dark ion-datetime,
+:root.dark ion-datetime {
+  color-scheme: dark;
+}
+
+/* Ensure datetime inside popover/modal also inherits theme */
+ion-popover ion-datetime,
+ion-modal ion-datetime {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+}
