@@ -30,7 +30,12 @@ export class AuthenticatedImageService {
 
     try {
       const blob = await firstValueFrom(
-        this.http.get(absUrl, { responseType: 'blob' })
+        this.http.get(absUrl, {
+          responseType: 'blob',
+          headers: {
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+          }
+        })
       );
       return URL.createObjectURL(blob);
     } catch (e) {
