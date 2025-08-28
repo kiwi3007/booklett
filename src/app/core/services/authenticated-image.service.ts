@@ -23,9 +23,26 @@ export class AuthenticatedImageService {
     if (!baseUrl) return null;
 
     // Normalize to absolute URL using baseUrl as origin
+    // Transform MediaCover URLs to use api/v1 and apikey param
     let absUrl: string;
     try {
-      absUrl = new URL(url, baseUrl).toString();
+      const mediaMatch = /^\/?(MediaCover\/.*)$/i.exec(url);
+      if (mediaMatch) {
+        // Get the MediaCover path part
+        const mediaPath = mediaMatch[1];
+        const apiKey = this.apiConfig.getApiKeySync();
+        if (!apiKey) return null;
+
+        // Create the transformed URL
+        // If baseUrl ends with /, remove it for consistent joining
+        const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+        const u = new URL(`${base}/api/v1/${mediaPath}`);
+        u.searchParams.append('apikey', apiKey);
+        absUrl = u.toString();
+      } else {
+        // Non-MediaCover URL, just resolve against base
+        absUrl = new URL(url, baseUrl).toString();
+      }
     } catch {
       return null;
     }
@@ -62,14 +79,6 @@ export class AuthenticatedImageService {
    * Check if a URL needs authentication (case-insensitive match for /mediacover on same origin)
    */
   needsAuthentication(url: string): boolean {
-    const baseUrl = this.apiConfig.getBaseUrlSync();
-    if (!baseUrl) return false;
-    try {
-      const u = new URL(url, baseUrl);
-      const b = new URL(baseUrl);
-      return u.host === b.host && u.pathname.toLowerCase().includes('/mediacover');
-    } catch {
-      return false;
-    }
+    return /^\/?(MediaCover\/.*)$/i.test(url);
   }
 }
