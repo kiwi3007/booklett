@@ -7,14 +7,16 @@ import { ApiConfigService } from './api-config.service';
   providedIn: 'root'
 })
 export class AuthenticatedImageService {
+  private blobCache = new Map<string, string>(); // url -> blobUrl
+  private inFlight = new Map<string, Promise<string | null>>(); // url -> promise
+
   constructor(
     private http: HttpClient,
     private apiConfig: ApiConfigService
   ) {}
 
   /**
-   * Load an image with authentication and return it as a blob URL
-   * Uses HttpClient so our interceptor attaches X-Api-Key
+   * Load an image with authentication and return it as a blob URL (cached)
    */
   async loadImage(url: string): Promise<string | null> {
     const baseUrl = this.apiConfig.getBaseUrlSync();
@@ -28,20 +30,32 @@ export class AuthenticatedImageService {
       return null;
     }
 
-    try {
-      const blob = await firstValueFrom(
-        this.http.get(absUrl, {
-          responseType: 'blob',
-          headers: {
-            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-          }
-        })
-      );
-      return URL.createObjectURL(blob);
-    } catch (e) {
-      console.error('Authenticated image fetch failed', e);
-      return null;
-    }
+    // Serve from cache if available
+    const cached = this.blobCache.get(absUrl);
+    if (cached) return cached;
+
+    // Coalesce parallel requests
+    const existing = this.inFlight.get(absUrl);
+    if (existing) return existing;
+
+    const p = (async () => {
+      try {
+        const blob = await firstValueFrom(
+          this.http.get(absUrl, { responseType: 'blob' })
+        );
+        const blobUrl = URL.createObjectURL(blob);
+        this.blobCache.set(absUrl, blobUrl);
+        return blobUrl;
+      } catch (e) {
+        console.error('Authenticated image fetch failed', e);
+        return null;
+      } finally {
+        this.inFlight.delete(absUrl);
+      }
+    })();
+
+    this.inFlight.set(absUrl, p);
+    return p;
   }
 
   /**

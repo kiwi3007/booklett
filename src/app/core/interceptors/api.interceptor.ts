@@ -13,10 +13,22 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     url = `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   }
 
-  // Add API key header if set
   const apiKey = config.getApiKeySync();
-  const headers = apiKey ? req.headers.set('X-Api-Key', apiKey) : req.headers;
 
+  // For MediaCover image requests (blob), append apiKey as query param to avoid CORS preflight
+  if (apiKey && req.responseType === 'blob' && /\/mediacover\//i.test(url)) {
+    const u = new URL(url);
+    if (!u.searchParams.has('apikey')) {
+      u.searchParams.set('apikey', apiKey);
+    }
+    url = u.toString();
+    // Do NOT set custom header for these to avoid preflight
+    const cloned = req.clone({ url, headers: req.headers });
+    return next(cloned);
+  }
+
+  // Default: add API key header if set
+  const headers = apiKey ? req.headers.set('X-Api-Key', apiKey) : req.headers;
   const cloned = req.clone({ url, headers });
   return next(cloned);
 };
