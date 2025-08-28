@@ -1,6 +1,7 @@
 import { Component, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton, RouterLink } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonRefresher, IonRefresherContent, IonChip, IonLabel, IonSelect, IonSelectOption, IonInfiniteScroll, IonInfiniteScrollContent, IonSpinner, IonSegment, IonSegmentButton } from '@ionic/angular/standalone';
+import { RouterLink } from '@angular/router';
 import { ApiConfigService } from '../../core/services/api-config.service';
 import { ActionSheetController, PopoverController, NavController } from '@ionic/angular/standalone';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
@@ -14,7 +15,7 @@ import { AuthorListItemComponent } from '../../shared/author-list-item/author-li
 import { BookCardComponent } from '../../shared/book-card/book-card.component';
 import { BookLibraryListItemComponent } from '../../shared/book-library-list-item/book-library-list-item.component';
 import { addIcons } from 'ionicons';
-import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline } from 'ionicons/icons';
+import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline, warningOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-library',
@@ -42,11 +43,13 @@ import { swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutli
     IonSpinner,
     IonSegment,
     IonSegmentButton,
+    RouterLink,
     AuthorCardComponent,
     AuthorListItemComponent,
     BookCardComponent,
     BookLibraryListItemComponent
   ],
+  standalone: true,
 })
 export class LibraryPage implements OnDestroy {
   view$ = new BehaviorSubject<'grid' | 'list'>('grid');
@@ -201,8 +204,8 @@ constructor(
     private cdr: ChangeDetectorRef,
     private navCtrl: NavController,
     private apiConfig: ApiConfigService
-  )
-    addIcons({ swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline });
+  ) {
+    addIcons({ swapVerticalOutline, listOutline, gridOutline, bookOutline, filterOutline, arrowUpOutline, arrowDownOutline, checkmark, chevronDownOutline, peopleOutline, searchOutline, warningOutline });
     const savedView = (localStorage.getItem('library:view') as 'grid'|'list') ?? 'grid';
     this.view$.next(savedView);
     const savedLibraryType = (localStorage.getItem('library:type') as 'authors'|'books') ?? 'authors';
@@ -236,36 +239,30 @@ constructor(
     });
     this.subscriptions.add(filterSub);
 
-    // Subscribe to server settings changes
-    const settingsSub = this.apiConfig.baseUrl.subscribe(() => {
-      if (this.hasValidBaseUrl()) {
-        this.resetInfiniteScroll();
-        this.initializeData();
-      }
-    });
-    this.subscriptions.add(settingsSub);
+    // Note: data will refresh after configuration via TabsPage flow
+    // which triggers author and book services to refresh after successful connection.
   }
 
-  onSearch(ev: CustomEvent) {
+  onSearch(ev: CustomEvent): void {
     this.search$.next((ev.detail?.value ?? '') as string);
   }
 
-  setView(v: 'grid' | 'list') { 
+  setView(v: 'grid' | 'list'): void { 
     this.view$.next(v); 
     localStorage.setItem('library:view', v);
   }
 
-  setLibraryType(type: 'authors' | 'books') {
+  setLibraryType(type: 'authors' | 'books'): void {
     this.libraryType$.next(type);
     localStorage.setItem('library:type', type);
   }
 
-  setBookMediaType(type: 'audiobook' | 'ebook') {
+  setBookMediaType(type: 'audiobook' | 'ebook'): void {
     this.bookMediaType$.next(type);
     localStorage.setItem('library:bookMediaType', type);
   }
 
-  setSort(s: AuthorSort | string) {
+  setSort(s: AuthorSort | string): void {
     if (this.libraryType$.value === 'authors') {
       this.authorSort$.next(s as AuthorSort);
     } else {
@@ -273,7 +270,7 @@ constructor(
     }
   }
 
-  async presentSortOptions() {
+  async presentSortOptions(): Promise<void> {
     if (this.libraryType$.value === 'authors') {
       const sortLabels: Record<AuthorSort, string> = {
         monitored: 'Monitored Status',
@@ -355,15 +352,15 @@ constructor(
     }
   }
 
-  toggleOrder() { 
+  toggleOrder(): void { 
     this.order$.next(this.order$.value === 'asc' ? 'desc' : 'asc'); 
   }
 
-  trackById(_: number, item: Author | Book) { 
+  trackById(_: number, item: Author | Book): string | number { 
     return item.id; 
   }
 
-  toggleMonitored(a: Author) { 
+  toggleMonitored(a: Author): void { 
     this.authorService.toggleMonitored(a.id).subscribe(); 
   }
 
@@ -461,7 +458,7 @@ constructor(
     this.cdr.detectChanges(); // Force change detection
   }
 
-  loadData(event: any) {
+  loadData(event: any): void {
     if (!this.hasValidBaseUrl()) {
       event.target.complete();
       return;
@@ -484,7 +481,7 @@ constructor(
     }, 100);
   }
 
-  handleRefresh(event: CustomEvent) {
+  handleRefresh(event: CustomEvent): void {
     if (!this.hasValidBaseUrl()) {
       (event.target as any).complete();
       return;
@@ -531,16 +528,16 @@ private resetInfiniteScroll() {
     }
   }
 
-  private hasValidBaseUrl(): boolean {
+  hasValidBaseUrl(): boolean {
     return !!this.apiConfig.getBaseUrlSync();
   }
 
-  openGlobalSearch(term: string) {
+  openGlobalSearch(term: string): void {
     if (!term?.trim()) return;
     this.navCtrl.navigateForward(`/search/${encodeURIComponent(term.trim())}`);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 }

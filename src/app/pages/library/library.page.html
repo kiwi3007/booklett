@@ -153,8 +153,9 @@
       loadingText="Loading more...">
     </ion-infinite-scroll-content>
   </ion-infinite-scroll>
-
-  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+  
+  <!-- Only show refresher control when base URL is configured -->
+  <ion-refresher *ngIf="hasValidBaseUrl()" slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 </ion-content>
