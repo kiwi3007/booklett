@@ -1,6 +1,5 @@
 import { Directive, ElementRef, Input, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { AuthenticatedImageService } from '../../core/services/authenticated-image.service';
-import { firstValueFrom } from 'rxjs';
 
 @Directive({
   selector: '[appAuthenticatedImage]',
@@ -41,27 +40,22 @@ export class AuthenticatedImageDirective implements OnChanges, OnDestroy {
       return;
     }
 
-    // Check if URL needs authentication
+    // If no auth needed, set directly
     if (!this.imageService.needsAuthentication(this.appAuthenticatedImage)) {
       this.el.nativeElement.src = this.appAuthenticatedImage;
       this.el.nativeElement.style.opacity = '1';
       return;
     }
 
-    try {
-      // Load authenticated image
-      this.blobUrl = await firstValueFrom(this.imageService.loadImage(this.appAuthenticatedImage));
-      if (this.blobUrl) {
-        this.el.nativeElement.src = this.blobUrl;
-      } else {
-        this.el.nativeElement.src = this.fallbackSrc;
-      }
-    } catch (error) {
-      console.error('Failed to load authenticated image:', error);
+    // Load via HttpClient with API key and set blob URL
+    const blobUrl = await this.imageService.loadImage(this.appAuthenticatedImage);
+    if (blobUrl) {
+      this.blobUrl = blobUrl;
+      this.el.nativeElement.src = blobUrl;
+    } else {
       this.el.nativeElement.src = this.fallbackSrc;
-    } finally {
-      this.el.nativeElement.style.opacity = '1';
     }
+    this.el.nativeElement.style.opacity = '1';
   }
 
   private cleanupBlobUrl() {

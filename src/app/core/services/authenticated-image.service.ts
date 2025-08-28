@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ApiConfigService } from './api-config.service';
 
 @Injectable({
@@ -14,35 +14,43 @@ export class AuthenticatedImageService {
 
   /**
    * Load an image with authentication and return it as a blob URL
-   * @param url The URL of the image to load
-   * @returns Observable of the blob URL, or null if loading failed
+   * Uses HttpClient so our interceptor attaches X-Api-Key
    */
-  loadImage(url: string): Observable<string | null> {
-    // Only proceed if we have a base URL and API key
+  async loadImage(url: string): Promise<string | null> {
     const baseUrl = this.apiConfig.getBaseUrlSync();
-    if (!baseUrl) {
-      return of(null);
+    if (!baseUrl) return null;
+
+    // Normalize to absolute URL using baseUrl as origin
+    let absUrl: string;
+    try {
+      absUrl = new URL(url, baseUrl).toString();
+    } catch {
+      return null;
     }
 
-    // If the URL starts with /mediacover, ensure it has the base URL
-    if (url.startsWith('/mediacover')) {
-      url = `${baseUrl}${url}`;
+    try {
+      const blob = await firstValueFrom(
+        this.http.get(absUrl, { responseType: 'blob' })
+      );
+      return URL.createObjectURL(blob);
+    } catch (e) {
+      console.error('Authenticated image fetch failed', e);
+      return null;
     }
-
-    return this.http.get(url, {
-      responseType: 'blob'
-    }).pipe(
-      map(blob => URL.createObjectURL(blob)),
-      catchError(() => of(null))
-    );
   }
 
   /**
-   * Check if a URL needs authentication
-   * @param url The URL to check
-   * @returns true if the URL needs authentication
+   * Check if a URL needs authentication (case-insensitive match for /mediacover on same origin)
    */
   needsAuthentication(url: string): boolean {
-    return url.includes('/mediacover');
+    const baseUrl = this.apiConfig.getBaseUrlSync();
+    if (!baseUrl) return false;
+    try {
+      const u = new URL(url, baseUrl);
+      const b = new URL(baseUrl);
+      return u.host === b.host && u.pathname.toLowerCase().includes('/mediacover');
+    } catch {
+      return false;
+    }
   }
 }
