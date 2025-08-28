@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Author, AuthorSort, ChaptarrAuthor, mapChaptarrAuthorToAuthor } from '../models/author.model';
 import { Book, mapApiBookToBook } from '../models/book.model';
+import { ApiConfigService } from './api-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthorService {
@@ -11,10 +12,27 @@ export class AuthorService {
   readonly authors$ = this.authorsSubject.asObservable();
   private isLoading = false;
   private hasLoadedInitially = false;
+  private retryTimeout: any = null;
 
-  constructor(private http: HttpClient) {
-    // Don't auto-load on service initialization anymore
-    // Let components request when needed
+  constructor(
+    private http: HttpClient,
+    // Keep a reference to ApiConfigService to watch for auth changes
+    private apiConfig: ApiConfigService
+  ) {
+    // Watch for changes in API key to trigger reload of authors
+    effect(() => {
+      const apiKey = this.apiConfig.apiKey();
+      if (apiKey) {
+        // If we get a valid API key and haven't loaded successfully yet, try loading
+        if (!this.hasLoadedInitially) {
+          // Small delay to ensure API key is properly set in interceptor
+          setTimeout(() => this.loadAuthors(true).subscribe(), 100);
+        }
+      } else {
+        // Clear the cache when API key is removed
+        this.clearAuthorsCache();
+      }
+    });
   }
 
   /**
